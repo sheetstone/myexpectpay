@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  displayName String
+  firebaseUid String   @unique
+  createdAt   DateTime @default(now())
+
+  bankAccounts BankAccount[]
+  cases        Case[]
+  recipients   Recipient[]
+  payments     Payment[]
+  messages     Message[]
+}
+
+model BankAccount {
+  id                 String      @id @default(uuid())
+  userId             String
+  bankName           String
+  routingNumber      String
+  accountNumber      String
+  accountNumberLast4 String
+  accountType        AccountType
+  verified           Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Case {
+  id         String   @id @default(uuid())
+  userId     String
+  caseNumber String
+  ncpName    String
+  children   String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipients Recipient[]
+}
+
+model Recipient {
+  id        String   @id @default(uuid())
+  userId    String
+  firstName String
+  lastName  String
+  email     String
+  caseId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  case     Case?     @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  payments Payment[]
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  userId        String
+  amount        Decimal       @db.Decimal(10, 2)
+  bankId        String?
+  caseNumber    String
+  recipientId   String?
+  recipientName String
+  paymentDate   DateTime
+  status        PaymentStatus
+  type          PaymentType
+  createdAt     DateTime      @default(now())
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bank      BankAccount? @relation(fields: [bankId], references: [id], onDelete: SetNull)
+  recipient Recipient?   @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  userId    String
+  sender    String
+  subject   String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum AccountType {
+  checking
+  saving
+}
+
+enum PaymentStatus {
+  accepted
+  cancelled
+  completed
+  expired
+  in_progress
+  rejected
+  returned
+  reversal_in_progress
+  reversal_completed
+  reversal_rejected
+}
+
+enum PaymentType {
+  sent
+  received
+  pending_sent
+  pending_received
+}

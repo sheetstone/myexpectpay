@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Prisma
+prisma/*.db
+
+# Docker
+*.pid
+
+# Project
+.claude/
+.github/
+log/
+plan/
+CLAUDE.md
+MIGRATION_PLAN.md
+REQUIREMENTS.md
+
+
+# Data migration exports (contain user data)
+scripts/firebase-export.json
