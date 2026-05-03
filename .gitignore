@@ -47,3 +47,6 @@ REQUIREMENTS.md
 
 # Data migration exports (contain user data)
 scripts/firebase-export.json
+
+# HTTP test files (may contain tokens)
+*.http

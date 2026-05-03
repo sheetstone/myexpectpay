@@ -10,4 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    headers: {
+      // Firebase signInWithPopup needs to call window.closed on the auth popup.
+      // 'same-origin' (Chrome's default in some contexts) blocks that call.
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+    },
+  },
 })

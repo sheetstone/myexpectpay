@@ -1,0 +1,60 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 248, 250, 0.85);
+  z-index: 9999;
+}
+
+.bricks {
+  display: grid;
+  grid-template-columns: repeat(3, 10px);
+  grid-template-rows: repeat(3, 10px);
+  gap: 4px;
+}
+
+.brick {
+  width: 10px;
+  height: 10px;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
+  animation: brickPulse 1.2s ease-in-out infinite;
+}
+
+.brick:nth-child(1)  { animation-delay: 0s; }
+.brick:nth-child(2)  { animation-delay: 0.1s; }
+.brick:nth-child(3)  { animation-delay: 0.2s; }
+.brick:nth-child(4)  { animation-delay: 0.3s; }
+.brick:nth-child(5)  { animation-delay: 0.4s; }
+.brick:nth-child(6)  { animation-delay: 0.5s; }
+.brick:nth-child(7)  { animation-delay: 0.6s; }
+.brick:nth-child(8)  { animation-delay: 0.7s; }
+.brick:nth-child(9)  { animation-delay: 0.8s; }
+
+@keyframes brickPulse {
+  0%, 80%, 100% { opacity: 0.15; transform: scale(0.85); }
+  40%            { opacity: 1;    transform: scale(1); }
+}
+
+.inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inlineBricks {
+  display: grid;
+  grid-template-columns: repeat(3, 6px);
+  grid-template-rows: repeat(3, 6px);
+  gap: 2px;
+}
+
+.inlineBrick {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 2px;
+  animation: brickPulse 1.2s ease-in-out infinite;
+}
