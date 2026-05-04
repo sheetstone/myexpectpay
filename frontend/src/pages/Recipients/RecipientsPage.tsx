@@ -1,10 +1,30 @@
+import { useState } from 'react'
 import { useIntl } from 'react-intl'
+import type { Recipient } from '../../types/api'
+import { RecipientList } from './RecipientList'
+import { RecipientForm } from './RecipientForm'
+import styles from './RecipientsPage.module.css'
 
 export function RecipientsPage() {
   const intl = useIntl()
+  const fmt = (id: string) => intl.formatMessage({ id })
+  const [editing, setEditing] = useState<Recipient | 'new' | null>(null)
+
   return (
-    <main style={{ padding: 'var(--space-8)', maxWidth: 'var(--content-max-w)', margin: '0 auto' }}>
-      <h1>{intl.formatMessage({ id: 'recipients.title' })}</h1>
+    <main className={styles.root}>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>{fmt('recipients.title')}</h1>
+        <button className={styles.addBtn} onClick={() => setEditing('new')}>
+          {fmt('recipients.add')}
+        </button>
+      </div>
+
+      <RecipientList onEdit={(r) => setEditing(r)} />
+
+      <RecipientForm
+        recipient={editing}
+        onClose={() => setEditing(null)}
+      />
     </main>
   )
 }

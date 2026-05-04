@@ -1,5 +1,6 @@
 export { Spinner } from './Spinner'
 export { Icon } from './Icon'
+export { Modal } from './Modal'
 export { Pagination } from './Pagination'
 export { ConfirmDialog } from './ConfirmDialog'
 export { ToastProvider, useToast } from './Toast'

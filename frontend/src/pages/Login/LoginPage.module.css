@@ -1,45 +1,96 @@
+/* ── Root layout ──────────────────────────────────────────────── */
 .root {
+  display: flex;
   min-height: 100svh;
+}
+
+/* ── Hero (left column) ───────────────────────────────────────── */
+.hero {
+  flex: 0 0 55%;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      45deg,
+      rgba(255,255,255,0.5) 0%,  rgba(255,255,255,0) 10%,
+      rgba(255,255,255,0.3) 20%, rgba(255,255,255,0) 30%,
+      rgba(255,255,255,0.6) 40%, rgba(255,255,255,0) 50%,
+      rgba(255,255,255,0.4) 60%, rgba(255,255,255,0) 70%,
+      rgba(255,255,255,0.4) 80%, rgba(255,255,255,0) 90%,
+      rgba(255,255,255,0.3) 100%
+    ),
+    linear-gradient(135deg, transparent, #f0e8f6),
+    radial-gradient(circle at top left, #f0fdf9, transparent),
+    linear-gradient(45deg, #c4c2ea, #e8edd8);
+}
+
+.cards {
+  position: absolute;
+  inset: 0;
+}
+
+/* Shared sticky-note card */
+.card {
+  background: lightyellow;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  /* irregular paper-torn corners — preserved from original */
+  border-top-right-radius: 68px 2px;
+  border-top-left-radius: 2px 53px;
+  border-bottom-right-radius: 2px 73px;
+  border-bottom-left-radius: 78px 1.3px;
+  box-shadow: 15px 28px 25px -18px rgba(0, 0, 0, 0.2);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  padding: var(--space-4) var(--space-5);
+  position: absolute;
+  width: 260px;
+  min-height: 150px;
+}
+
+.card1 { transform: rotate(-10deg); top: 60px;  left: 100px; }
+.card2 { transform: rotate(8deg);   top: 230px; left: 200px; }
+.card3 { transform: rotate(-8deg);  top: 400px; left: 100px; }
+
+/* ── Login side (right column) ────────────────────────────────── */
+.loginSide {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
-  padding: var(--space-6);
+  padding: var(--space-8);
 }
 
-.card {
+.loginBox {
   background: var(--color-surface);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
-  padding: var(--space-10) var(--space-8);
   width: 100%;
   max-width: 400px;
+  overflow: hidden;
+}
+
+.loginBoxHeader {
+  background: #f7f8fa;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  padding: var(--space-4) var(--space-6) var(--space-3);
+}
+
+.loginBoxBody {
+  padding: var(--space-6) var(--space-8) var(--space-8);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
-.logoMark {
-  display: flex;
-  gap: 4px;
-  align-items: flex-end;
-}
-
-.logoBar {
-  width: 7px;
-  background: var(--color-primary);
-  border-radius: 4px;
-}
-
-.logoBar:nth-child(1) { height: 14px; }
-.logoBar:nth-child(2) { height: 22px; }
-.logoBar:nth-child(3) { height: 17px; }
-.logoBar:nth-child(4) { height: 28px; }
-
-.title {
+.welcome {
   font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-light);
   color: var(--color-text-heading);
   margin: 0;
 }
@@ -48,51 +99,57 @@
   color: var(--color-danger);
   font-size: var(--text-sm);
   margin: 0;
-  text-align: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
 }
 
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  width: 100%;
-}
-
+/* ── Google button ────────────────────────────────────────────── */
 .googleBtn {
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  background: #4285f4;
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.googleBtn:hover { opacity: 0.88; }
-
-.emailBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   width: 100%;
   padding: var(--space-3) var(--space-4);
   background: var(--color-surface);
-  color: var(--color-text-primary);
+  color: #2d333a;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   font-size: var(--text-base);
-  font-weight: var(--weight-medium);
+  font-family: var(--font-ui);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s ease;
 }
 
-.emailBtn:hover { background: var(--color-bg); }
+.googleBtn:hover:not(:disabled) { background: #f2f2f2; }
+.googleBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* ── "or" separator ───────────────────────────────────────────── */
+.orRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.orLine {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.orText {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Email/password form ──────────────────────────────────────── */
 .form {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  width: 100%;
 }
 
 .label {
@@ -114,7 +171,27 @@
   transition: border-color 0.15s;
 }
 
-.input:focus { border-color: var(--color-primary); }
+.input:focus  { border-color: var(--color-primary); }
+.inputError   { border-color: var(--color-danger) !important; }
+
+.fieldError {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--space-2));
+}
+
+.forgotLink {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.forgotLink:hover { color: var(--color-primary); text-decoration: underline; }
 
 .submitBtn {
   width: 100%;
@@ -132,14 +209,24 @@
 .submitBtn:hover:not(:disabled) { opacity: 0.88; }
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.backBtn {
-  background: none;
-  border: none;
-  color: var(--color-text-secondary);
+/* ── Bottom switch prompt ─────────────────────────────────────── */
+.switchPrompt {
+  margin: 0;
   font-size: var(--text-sm);
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
-.backBtn:hover { color: var(--color-text-primary); }
+.switchLink {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+
+.switchLink:hover { text-decoration: underline; }
+
+/* ── Responsive — hide hero on narrow screens ─────────────────── */
+@media (max-width: 768px) {
+  .hero { display: none; }
+  .loginSide { padding: var(--space-6); }
+}

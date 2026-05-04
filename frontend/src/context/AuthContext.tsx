@@ -14,6 +14,7 @@ interface AuthContextValue {
   loading: boolean
   signInWithGoogle: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
+  registerWithEmail: (displayName: string, email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -64,8 +65,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithEmailAndPassword(auth, email, password)
   }, [])
 
+  const registerWithEmail = useCallback(async (displayName: string, email: string, password: string) => {
+    await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ displayName, email, password }),
+    })
+    await signInWithEmailAndPassword(auth, email, password)
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signInWithEmail, registerWithEmail, signOut }}>
       {children}
     </AuthContext.Provider>
   )

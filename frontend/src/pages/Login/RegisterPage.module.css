@@ -1,0 +1,4 @@
+/* slightly more vertical padding inside the body since no orRow */
+.body {
+  gap: var(--space-5);
+}

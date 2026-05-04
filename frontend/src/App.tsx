@@ -4,6 +4,8 @@ import { Header } from './components/layout/Header'
 import { Nav } from './components/layout/Nav'
 import { Footer } from './components/layout/Footer'
 import { LoginPage } from './pages/Login/LoginPage'
+import { RegisterPage } from './pages/Login/RegisterPage'
+import { ForgotPasswordPage } from './pages/Login/ForgotPasswordPage'
 import { HomePage } from './pages/Home/HomePage'
 import { BankAccountPage } from './pages/BankAccount/BankAccountPage'
 import { CasesPage } from './pages/Cases/CasesPage'
@@ -30,6 +32,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route
           path="/"
           element={
