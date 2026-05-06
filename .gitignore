@@ -44,6 +44,12 @@ CLAUDE.md
 MIGRATION_PLAN.md
 REQUIREMENTS.md
 
+#playwright
+.playwright-mcp/
+
+#design
+pencil/
+
 
 # Data migration exports (contain user data)
 scripts/firebase-export.json
