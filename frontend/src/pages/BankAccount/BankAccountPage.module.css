@@ -1,62 +1,39 @@
+/* ── Page shell ──────────────────────────────────────────────────────────── */
 .root {
   max-width: var(--content-max-w);
   margin: 0 auto;
-  padding: var(--space-8) var(--space-6);
+  padding: var(--space-6) var(--space-6) var(--space-16);
 }
 
-.titleRow {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
+.pageHead {
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid rgba(47, 168, 152, 0.18);
   margin-bottom: var(--space-6);
 }
 
-.title {
-  font-size: var(--text-2xl);
+.pageHead h1 {
+  font-size: 26px;
   font-weight: var(--weight-light);
   color: var(--color-text-heading);
-  margin: 0 0 var(--space-1) 0;
+  margin: 0 0 var(--space-1);
 }
 
-.description {
+.pageHead .sub {
   font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
+  color: var(--color-text-muted);
 }
 
-.addBtn {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-5);
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-family: var(--font-ui);
-  font-weight: var(--weight-medium);
-  cursor: pointer;
-  transition: background 0.15s;
+/* ── Master-detail grid ──────────────────────────────────────────────────── */
+.mdGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 28px;
+  align-items: start;
 }
 
-.addBtn:hover {
-  background: var(--color-primary-dark);
-}
-
-.centred {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-12) 0;
-}
-
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .mdGrid {
+    grid-template-columns: 1fr;
+  }
 }

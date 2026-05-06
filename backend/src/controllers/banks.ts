@@ -9,6 +9,12 @@ export async function list(req: Request, res: Response, next: NextFunction) {
   } catch (err) { next(err) }
 }
 
+export async function detail(req: Request, res: Response, next: NextFunction) {
+  try {
+    res.json(await bankService.getBankDetail(req.user.id, req.params['id'] as string))
+  } catch (err) { next(err) }
+}
+
 export async function create(req: Request, res: Response, next: NextFunction) {
   try {
     res.status(201).json(await bankService.createBank(req.user.id, req.body))

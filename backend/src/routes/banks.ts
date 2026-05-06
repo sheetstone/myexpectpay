@@ -9,6 +9,7 @@ const router = Router()
 router.use(requireAuth)
 
 router.get('/', banks.list)
+router.get('/:id', banks.detail)
 router.post('/', validate(createBankSchema), banks.create)
 router.patch('/:id', validate(updateBankSchema), banks.update)
 router.delete('/:id', banks.remove)

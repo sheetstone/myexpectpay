@@ -1,0 +1,194 @@
+/* ── Account list rail ───────────────────────────────────────────────────── */
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.listHead {
+  padding: 10px 16px;
+  border-bottom: 2px solid rgba(47, 168, 152, 0.18);
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.listHead .count {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* ── Account item ────────────────────────────────────────────────────────── */
+.item {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px dashed #bcbcbc;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.item:hover {
+  background: #fafbfc;
+}
+
+.item.selected {
+  background: var(--color-primary-light);
+}
+
+.item.selected::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--color-primary);
+  border-radius: 0 2px 2px 0;
+}
+
+.itemBody {}
+
+.itemNick {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-heading);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.3;
+}
+
+.star {
+  color: #f59e0b;
+  font-size: 11px;
+}
+
+.itemMeta {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Status pills ────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.pillVerified {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.pillPending {
+  background: #fff1e0;
+  color: #b86a18;
+}
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px dashed #bcbcbc;
+  background: #fafbfc;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.pages {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pg {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: 12px;
+  transition: background 0.12s;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+.pg:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.pgActive {
+  background: var(--color-primary) !important;
+  color: white;
+}
+
+.pgDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Add button ──────────────────────────────────────────────────────────── */
+.addBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.addBtn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}

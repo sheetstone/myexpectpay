@@ -3,10 +3,12 @@ import { Link, Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useIntl } from 'react-intl'
 import { useAuth } from '../../context/AuthContext'
 import { Spinner } from '../../components/ui'
+import { IconGoogle, IconEye, IconEyeOff, IconAlertCircle, IconLock, IconShield, IconCheck } from '../../components/ui/icons'
+import { usePasswordToggle, useServerError, useFmt } from '../../hooks'
 import { ApiError } from '../../api/client'
+import { BrandPanel } from './BrandPanel'
 import styles from './LoginPage.module.css'
 
 interface LoginFields {
@@ -23,10 +25,11 @@ function buildSchema(fmt: (id: string) => string) {
 
 export function LoginPage() {
   const { user, loading, signInWithGoogle, signInWithEmail } = useAuth()
-  const intl = useIntl()
-  const fmt = (id: string) => intl.formatMessage({ id })
-  const [serverError, setServerError] = useState('')
+  const fmt = useFmt()
+  const { error: serverError, setError: setServerError } = useServerError()
   const [googleBusy, setGoogleBusy] = useState(false)
+  const pwd = usePasswordToggle()
+  const [remember, setRemember] = useState(true)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFields>({
     resolver: yupResolver(buildSchema(fmt)),
@@ -61,93 +64,112 @@ export function LoginPage() {
   }
 
   return (
-    <div className={styles.root}>
-      <div className={styles.hero} aria-hidden="true">
-        <div className={styles.cards}>
-          <div className={`${styles.card} ${styles.card1}`}>{fmt('auth.feature1')}</div>
-          <div className={`${styles.card} ${styles.card2}`}>{fmt('auth.feature2')}</div>
-          <div className={`${styles.card} ${styles.card3}`}>{fmt('auth.feature3')}</div>
+    <div className={styles.page}>
+      <BrandPanel />
+
+      <div className={styles.formSide}>
+        <div className={styles.formSideTop}>
+          <span>Don't have an account?</span>
+          <Link to="/register">Sign up</Link>
         </div>
-      </div>
 
-      <div className={styles.loginSide}>
-        <div className={styles.loginBox}>
-          <div className={styles.loginBoxHeader}>{fmt('auth.signIn')}</div>
-          <div className={styles.loginBoxBody}>
-            <h2 className={styles.welcome}>{fmt('auth.welcome')}</h2>
-
-            {serverError && <p className={styles.error} role="alert">{serverError}</p>}
+        <div className={styles.formWrap}>
+          <div className={styles.formInner}>
+            <h1 className={styles.formTitle}>{fmt('auth.welcome')}</h1>
+            <p className={styles.formSub}>Sign in to manage your bank accounts, cases, and payments.</p>
 
             <button
               type="button"
-              className={styles.googleBtn}
+              className={styles.ssoBtn}
               onClick={() => void handleGoogle()}
               disabled={googleBusy}
             >
-              {googleBusy ? <Spinner /> : (
-                <>
-                  <GoogleIcon />
-                  {fmt('auth.signInWithGoogle')}
-                </>
-              )}
+              {googleBusy ? <span className={styles.btnSpinner} /> : <IconGoogle />}
+              {googleBusy ? 'Signing in…' : fmt('auth.signInWithGoogle')}
             </button>
 
-            <div className={styles.orRow}>
-              <span className={styles.orLine} />
-              <span className={styles.orText}>{fmt('auth.orSeparator')}</span>
-              <span className={styles.orLine} />
-            </div>
+            <div className={styles.divider}>{fmt('auth.orSeparator')}</div>
 
-            <form className={styles.form} onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
-              <label className={styles.label}>
-                {fmt('auth.email')}
+            <form onSubmit={(e) => void handleSubmit(onSubmit)(e)} noValidate>
+              {serverError && (
+                <div className={styles.alert} role="alert">
+                  <span className={styles.alertIcon}><IconAlertCircle /></span>
+                  <div>
+                    <div className={styles.alertTitle}>Incorrect email or password</div>
+                    <div>{serverError}</div>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.field}>
+                <label className={styles.fieldLabel} htmlFor="email">{fmt('auth.email')}</label>
                 <input
+                  id="email"
                   type="email"
+                  placeholder="you@example.com"
                   className={`${styles.input}${errors.email ? ` ${styles.inputError}` : ''}`}
                   autoComplete="email"
                   {...register('email')}
                 />
                 {errors.email && <span className={styles.fieldError}>{errors.email.message}</span>}
-              </label>
+              </div>
 
-              <label className={styles.label}>
-                {fmt('auth.password')}
+              <div className={styles.field}>
+                <label className={styles.fieldLabel} htmlFor="password">{fmt('auth.password')}</label>
                 <input
-                  type="password"
-                  className={`${styles.input}${errors.password ? ` ${styles.inputError}` : ''}`}
+                  id="password"
+                  type={pwd.inputType}
+                  placeholder="Enter your password"
+                  className={`${styles.input} ${styles.inputWithIcon}${errors.password ? ` ${styles.inputError}` : ''}`}
                   autoComplete="current-password"
                   {...register('password')}
                 />
+                <button
+                  type="button"
+                  className={styles.pwdToggle}
+                  onClick={pwd.toggle}
+                  aria-label={pwd.visible ? 'Hide password' : 'Show password'}
+                >
+                  {pwd.visible ? <IconEyeOff /> : <IconEye />}
+                </button>
                 {errors.password && <span className={styles.fieldError}>{errors.password.message}</span>}
-              </label>
+              </div>
 
-              <div className={styles.formFooter}>
+              <div className={styles.checkRow}>
+                <label className={styles.checkLabel}>
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                  <span className={styles.customCheckbox} />
+                  <span>Remember me</span>
+                </label>
                 <Link to="/forgot-password" className={styles.forgotLink}>{fmt('auth.forgotPassword')}</Link>
               </div>
 
               <button type="submit" className={styles.submitBtn} disabled={isSubmitting}>
-                {isSubmitting ? <Spinner /> : fmt('auth.signIn')}
+                {isSubmitting ? <><span className={styles.btnSpinner} /> Signing in…</> : fmt('auth.signIn')}
               </button>
             </form>
 
-            <p className={styles.switchPrompt}>
-              {fmt('auth.newUser')}{' '}
-              <Link to="/register" className={styles.switchLink}>{fmt('auth.signUp')}</Link>
+            <p className={styles.formFoot}>
+              New to MyExpertPay? <Link to="/register">{fmt('auth.signUp')}</Link>
+            </p>
+
+            <div className={styles.trust}>
+              <span className={styles.trustItem}><IconLock /> 256-bit SSL</span>
+              <span className={styles.trustItem}><IconShield /> SOC 2 Type II</span>
+              <span className={styles.trustItem}><IconCheck /> PCI DSS</span>
+            </div>
+
+            <p className={styles.legal}>
+              By signing in, you agree to our{' '}
+              <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"/>
-      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"/>
-      <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332Z"/>
-      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58Z"/>
-    </svg>
   )
 }

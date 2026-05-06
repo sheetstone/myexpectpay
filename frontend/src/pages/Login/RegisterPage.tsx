@@ -1,12 +1,11 @@
-import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useIntl } from 'react-intl'
 import { useAuth } from '../../context/AuthContext'
 import { Spinner } from '../../components/ui'
 import { ApiError } from '../../api/client'
+import { useFmt, useServerError } from '../../hooks'
 import styles from './LoginPage.module.css'
 import ownStyles from './RegisterPage.module.css'
 
@@ -31,9 +30,8 @@ function buildSchema(fmt: (id: string) => string) {
 
 export function RegisterPage() {
   const { user, loading, registerWithEmail } = useAuth()
-  const intl = useIntl()
-  const fmt = (id: string) => intl.formatMessage({ id })
-  const [serverError, setServerError] = useState('')
+  const fmt = useFmt()
+  const { error: serverError, setError: setServerError } = useServerError()
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFields>({
     resolver: yupResolver(buildSchema(fmt)),

@@ -5,10 +5,15 @@ export const createBankSchema = z.object({
   routingNumber: z.string().length(9).regex(/^\d{9}$/),
   accountNumber: z.string().min(4).max(17).regex(/^\d+$/),
   accountType: z.enum(['checking', 'saving']),
+  nickname: z.string().max(60).optional().nullable(),
 })
 
 export const updateBankSchema = z.object({
-  accountType: z.enum(['checking', 'saving']),
+  accountType: z.enum(['checking', 'saving']).optional(),
+  nickname: z.string().max(60).optional().nullable(),
+  isPrimary: z.boolean().optional(),
+  receivePayments: z.boolean().optional(),
+  sendPayments: z.boolean().optional(),
 })
 
 export const bankQuerySchema = z.object({

@@ -23,11 +23,31 @@ export type AccountType = 'checking' | 'saving'
 export interface BankAccount {
   id: string
   bankName: string
+  nickname: string | null
   routingNumber: string
   accountNumberLast4: string
   accountType: AccountType
   verified: boolean
+  isPrimary: boolean
+  receivePayments: boolean
+  sendPayments: boolean
+  linkedPayments: number
   createdAt: string
+}
+
+export interface BankAccountDetail extends BankAccount {
+  stats: {
+    totalReceived: number
+    totalSent: number
+    linkedCases: number
+    lastActivity: string | null
+  }
+  recentPayments: Array<{
+    type: string
+    amount: string
+    paymentDate: string
+    caseNumber: string
+  }>
 }
 
 export interface CreateBankAccountInput {
@@ -35,10 +55,15 @@ export interface CreateBankAccountInput {
   routingNumber: string
   accountNumber: string
   accountType: AccountType
+  nickname?: string
 }
 
 export interface UpdateBankAccountInput {
-  accountType: AccountType
+  accountType?: AccountType
+  nickname?: string | null
+  isPrimary?: boolean
+  receivePayments?: boolean
+  sendPayments?: boolean
 }
 
 // ── Cases ─────────────────────────────────────────────────────────────────────

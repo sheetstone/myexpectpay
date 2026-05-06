@@ -1,9 +1,12 @@
 import { apiFetch } from './client'
-import type { BankAccount, CreateBankAccountInput, UpdateBankAccountInput, Paginated } from '../types/api'
+import type { BankAccount, BankAccountDetail, CreateBankAccountInput, UpdateBankAccountInput, Paginated } from '../types/api'
 
 export const banksApi = {
   list: (page = 1, limit = 20) =>
     apiFetch<Paginated<BankAccount>>(`/banks?page=${page}&limit=${limit}`),
+
+  getById: (id: string) =>
+    apiFetch<BankAccountDetail>(`/banks/${id}`),
 
   create: (data: CreateBankAccountInput) =>
     apiFetch<BankAccount>('/banks', { method: 'POST', body: JSON.stringify(data) }),

@@ -3,11 +3,11 @@ import { Link, Navigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useIntl } from 'react-intl'
 import { sendPasswordResetEmail } from 'firebase/auth'
 import { auth } from '../../lib/firebase'
 import { useAuth } from '../../context/AuthContext'
 import { Spinner } from '../../components/ui'
+import { useFmt, useServerError } from '../../hooks'
 import styles from './LoginPage.module.css'
 
 interface ForgotFields {
@@ -22,10 +22,9 @@ function buildSchema(fmt: (id: string) => string) {
 
 export function ForgotPasswordPage() {
   const { user, loading } = useAuth()
-  const intl = useIntl()
-  const fmt = (id: string, values?: Record<string, string>) => intl.formatMessage({ id }, values)
+  const fmt = useFmt()
+  const { error: serverError, setError: setServerError } = useServerError()
   const [successEmail, setSuccessEmail] = useState('')
-  const [serverError, setServerError] = useState('')
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ForgotFields>({
     resolver: yupResolver(buildSchema(fmt)),

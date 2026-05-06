@@ -22,10 +22,12 @@ interface AddFields {
   accountNumber: string
   confirmAccountNumber: string
   accountType: AccountType
+  nickname: string
 }
 
 interface EditFields {
   accountType: AccountType
+  nickname: string
 }
 
 function buildAddSchema(fmt: (id: string) => string) {
@@ -44,6 +46,7 @@ function buildAddSchema(fmt: (id: string) => string) {
       .mixed<AccountType>()
       .oneOf(['checking', 'saving'])
       .required(fmt('bankAccount.accountType')),
+    nickname: yup.string().max(60).optional().default(''),
   })
 }
 
@@ -53,6 +56,7 @@ function buildEditSchema(fmt: (id: string) => string) {
       .mixed<AccountType>()
       .oneOf(['checking', 'saving'])
       .required(fmt('bankAccount.accountType')),
+    nickname: yup.string().max(60).optional().default(''),
   })
 }
 
@@ -67,20 +71,20 @@ export function BankAccountForm({ bank, onClose }: BankAccountFormProps) {
 
   const addForm = useForm<AddFields>({
     resolver: yupResolver(buildAddSchema(fmt)),
-    defaultValues: { routingNumber: '', bankName: '', accountNumber: '', confirmAccountNumber: '', accountType: 'checking' },
+    defaultValues: { routingNumber: '', bankName: '', accountNumber: '', confirmAccountNumber: '', accountType: 'checking', nickname: '' },
   })
 
   const editForm = useForm<EditFields>({
     resolver: yupResolver(buildEditSchema(fmt)),
-    defaultValues: { accountType: isEdit ? bank.accountType : 'checking' },
+    defaultValues: { accountType: isEdit ? bank.accountType : 'checking', nickname: isEdit ? (bank.nickname ?? '') : '' },
   })
 
   useEffect(() => {
     if (isEdit) {
-      editForm.reset({ accountType: bank.accountType })
+      editForm.reset({ accountType: bank.accountType, nickname: bank.nickname ?? '' })
     }
     if (isNew) {
-      addForm.reset({ routingNumber: '', bankName: '', accountNumber: '', confirmAccountNumber: '', accountType: 'checking' })
+      addForm.reset({ routingNumber: '', bankName: '', accountNumber: '', confirmAccountNumber: '', accountType: 'checking', nickname: '' })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bank])
@@ -108,6 +112,7 @@ export function BankAccountForm({ bank, onClose }: BankAccountFormProps) {
         routingNumber: data.routingNumber,
         accountNumber: data.accountNumber,
         accountType: data.accountType,
+        nickname: data.nickname || undefined,
       })
       await queryClient.invalidateQueries({ queryKey: ['banks'] })
       toast(fmt('common.saveSuccess'), 'success')
@@ -121,7 +126,7 @@ export function BankAccountForm({ bank, onClose }: BankAccountFormProps) {
     if (!isEdit) return
     setServerError('')
     try {
-      await banksApi.update(bank.id, { accountType: data.accountType })
+      await banksApi.update(bank.id, { accountType: data.accountType, nickname: data.nickname || null })
       await queryClient.invalidateQueries({ queryKey: ['banks'] })
       toast(fmt('common.saveSuccess'), 'success')
       onClose()
@@ -208,6 +213,17 @@ export function BankAccountForm({ bank, onClose }: BankAccountFormProps) {
             </div>
           </fieldset>
 
+          <label className={styles.label}>
+            {fmt('bankAccount.nickname')}
+            <input
+              type="text"
+              placeholder={fmt('bankAccount.nicknameHint')}
+              maxLength={60}
+              className={styles.input}
+              {...addForm.register('nickname')}
+            />
+          </label>
+
           {serverError && <p className={styles.serverError} role="alert">{serverError}</p>}
 
           <div className={styles.actions}>
@@ -251,6 +267,17 @@ export function BankAccountForm({ bank, onClose }: BankAccountFormProps) {
               </label>
             </div>
           </fieldset>
+
+          <label className={styles.label}>
+            {fmt('bankAccount.nickname')}
+            <input
+              type="text"
+              placeholder={fmt('bankAccount.nicknameHint')}
+              maxLength={60}
+              className={styles.input}
+              {...editForm.register('nickname')}
+            />
+          </label>
 
           {serverError && <p className={styles.serverError} role="alert">{serverError}</p>}
 

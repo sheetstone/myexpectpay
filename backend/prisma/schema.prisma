@@ -24,11 +24,15 @@ model BankAccount {
   id                 String      @id @default(uuid())
   userId             String
   bankName           String
+  nickname           String?
   routingNumber      String
   accountNumber      String
   accountNumberLast4 String
   accountType        AccountType
   verified           Boolean     @default(false)
+  isPrimary          Boolean     @default(false)
+  receivePayments    Boolean     @default(true)
+  sendPayments       Boolean     @default(true)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
