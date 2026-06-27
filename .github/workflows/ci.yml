@@ -31,15 +31,14 @@ jobs:
       - name: Test
         run: npm run test
         env:
-          # Unit tests use mocked Firebase — no real project needed
+          # Firebase client (public — safe to hardcode for CI)
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-test
           NEXT_PUBLIC_FIREBASE_API_KEY: fake-api-key
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: demo-test.firebaseapp.com
           NEXT_PUBLIC_FIREBASE_APP_ID: 1:000000000000:web:0000000000000000
+          # Firebase Admin — lazy init falls back to demo project when credentials absent
           FIREBASE_PROJECT_ID: demo-test
-          FIREBASE_CLIENT_EMAIL: fake@demo-test.iam.gserviceaccount.com
-          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY_TEST }}
-          ACCOUNT_ENCRYPTION_KEY: ${{ secrets.ACCOUNT_ENCRYPTION_KEY_TEST }}
+          # ACCOUNT_ENCRYPTION_KEY not needed — crypto tests set their own key in beforeEach
 
       - name: Build
         run: npm run build
@@ -48,3 +47,4 @@ jobs:
           NEXT_PUBLIC_FIREBASE_API_KEY: fake-api-key
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: demo-test.firebaseapp.com
           NEXT_PUBLIC_FIREBASE_APP_ID: 1:000000000000:web:0000000000000000
+          FIREBASE_PROJECT_ID: demo-test

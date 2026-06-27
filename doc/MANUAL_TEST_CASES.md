@@ -1,9 +1,11 @@
 # Manual Test Cases — MyExpertPay
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Date:** 2026-06-27  
-**Scope:** Covers all features completed through Phase 05-009 (Phases 01–04 + Forgot Password redesign).  
-**Environment:** Local dev — `http://localhost:5173` (frontend) + `http://localhost:3001` (backend)
+**Scope:** Covers features built in **Phase 01 (Foundation)** — auth pages (login / register / forgot-password) and route protection. Sections 3–9 are carried forward from v1.0 and remain **not yet testable** in the new stack; they are updated from the old React+Express environment to the Next.js environment and will become executable as each phase ships.  
+**Stack:** Next.js 16 monolith (App Router) — single dev server  
+**Environment:** Local dev — `http://localhost:3000`  
+**Old environment (superseded):** `http://localhost:5173` (Vite/React) + `http://localhost:3001` (Express)
 
 ---
 
@@ -22,6 +24,9 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 ---
 
 ## 1. Authentication
+
+> **Status: Testable (Phase 01)**  
+> Login, register, and forgot-password pages are implemented at `/login`, `/register`, and `/forgot-password`. Auth is backed by Firebase Authentication (email+password + Google OAuth). The proxy protects all non-auth routes and redirects authenticated users away from auth pages.
 
 ### 1.1 Login — Email & Password
 
@@ -85,17 +90,22 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 2. Navigation & Layout
 
+> **Status: Partially testable (Phase 01)**  
+> TC-NAV-001 and TC-NAV-003 are testable — route protection (proxy) and logout API are implemented. TC-NAV-002, TC-NAV-004, and TC-NAV-005 require the dashboard shell and sub-pages (Phase 03+).
+
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
 |---|---|---|---|---|---|
 | TC-NAV-001 | Protected route — unauthenticated | 1. While logged out, navigate to `/` | Redirected to `/login`. | | |
-| TC-NAV-002 | All nav links work | 1. Log in<br>2. Click each nav item: Dashboard, Bank Accounts, Cases, Recipients, Payments | Each route loads without error. Active link is visually highlighted. | | |
+| TC-NAV-002 | All nav links work ⏳ | 1. Log in<br>2. Click each nav item: Dashboard, Bank Accounts, Cases, Recipients, Payments | Each route loads without error. Active link is visually highlighted. | N/A | Phase 03 — nav shell not built |
 | TC-NAV-003 | Logout | 1. Trigger sign-out from nav (avatar or logout button)<br>2. Attempt to navigate to `/` | Redirected to `/login`. Auth state cleared. | | |
-| TC-NAV-004 | 404 page | 1. Navigate to `/does-not-exist` | Not Found page renders. | | |
-| TC-NAV-005 | Page title / branding | 1. Open any authenticated page | "MyExpertPay" logo / branding visible in header. | | |
+| TC-NAV-004 | 404 page ⏳ | 1. Navigate to `/does-not-exist` | Not Found page renders. | N/A | Phase 03 |
+| TC-NAV-005 | Page title / branding ⏳ | 1. Open any authenticated page | "MyExpertPay" logo / branding visible in header. | N/A | Phase 03 |
 
 ---
 
 ## 3. Dashboard
+
+> **Status: Not yet testable — Phase 03 (frontend pages)**
 
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
 |---|---|---|---|---|---|
@@ -113,6 +123,8 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 ---
 
 ## 4. Bank Accounts
+
+> **Status: Not yet testable — requires Phase 02 (API) + Phase 03 (frontend pages)**
 
 ### 4.1 List & Layout
 
@@ -177,6 +189,8 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 5. Cases
 
+> **Status: Not yet testable — requires Phase 02 (API) + Phase 03 (frontend pages)**
+
 ### 5.1 List
 
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
@@ -224,6 +238,8 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 6. Recipients
 
+> **Status: Not yet testable — requires Phase 02 (API) + Phase 03 (frontend pages)**
+
 ### 6.1 List
 
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
@@ -270,6 +286,8 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 7. Payments
 
+> **Status: Not yet testable — requires Phase 02 (API) + Phase 03 (frontend pages)**
+
 ### 7.1 List
 
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
@@ -309,6 +327,9 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 8. Data Isolation (Row-Level Security)
 
+> **Status: API endpoints testable (Phase 02); full UI flow requires Phase 03**  
+> TC-SEC-001 through TC-SEC-004 require the UI to be built. TC-SEC-005 can be executed manually via `curl` or Postman once Phase 02 API routes are deployed.
+
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
 |---|---|---|---|---|---|
 | TC-SEC-001 | Bank accounts scoped to user | 1. Log in as User A<br>2. Note account IDs<br>3. Log in as User B | User B cannot see User A's bank accounts. | | |
@@ -320,6 +341,9 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 ---
 
 ## 9. Cross-Cutting Concerns
+
+> **Status: Partially testable**  
+> TC-CROSS-001 through TC-CROSS-005 require data pages (Phase 03+). TC-CROSS-006 (locale) is testable now — the `IntlProvider` is wired up in Phase 01; English strings are loaded by default.
 
 | TC-ID | Scenario | Steps | Expected Result | Pass/Fail | Notes |
 |---|---|---|---|---|---|
@@ -334,19 +358,29 @@ Legend: ✅ Pass · ❌ Fail · ⚠️ Partial
 
 ## 10. Pending Features — Not Yet Testable
 
-> These features are implemented as stubs or are not yet built. Each is tracked in a GitHub issue. **Do not execute these test cases** until the linked issue is closed.
+> Features planned for Phase 02+ that are not yet implemented. **Do not execute these test cases** until the linked phase/issue is complete.  
+> Issues #1–#25 tracked the old React+Express stack and have been superseded. New-stack issues start at #26.
 
-| Ref | Feature | One-line description | GitHub Issue |
+| Ref | Feature | One-line description | Planned Phase |
 |---|---|---|---|
-| P05-001 | Send Money Modal | Clicking "Send Money" opens a modal form that calls `POST /api/payments/send`. | [#1](https://github.com/sheetstone/myexpectpay/issues/1) |
-| P05-002 | Request Money Modal | Clicking "Request Money" opens a modal form that calls `POST /api/payments/request`. | [#2](https://github.com/sheetstone/myexpectpay/issues/2) |
-| P05-003 | Messages Page | `/messages` shows full inbox with read/unread state, accordion expansion, and nav badge update. | [#3](https://github.com/sheetstone/myexpectpay/issues/3) |
-| P05-004 | User Profile Page | `/profile` allows editing display name and changing password via Firebase re-auth. | [#4](https://github.com/sheetstone/myexpectpay/issues/4) |
-| P05-005 | Account Settings Page | `/settings` has a language switcher (EN/DE/ES) and a confirmed delete-account flow. | [#5](https://github.com/sheetstone/myexpectpay/issues/5) |
-| P05-006 | Delete User Endpoint | `DELETE /api/users/me` removes all user data in a single Postgres transaction. | [#6](https://github.com/sheetstone/myexpectpay/issues/6) |
-| P05-007 | i18n DE / ES gap fill | DE and ES files are missing 36+ `bankAccount.*` keys; new feature keys not yet added. | [#7](https://github.com/sheetstone/myexpectpay/issues/7) |
-| P05-008 | Mobile Responsive | All pages audited and fixed at 361 / 711 / 921 / 1201 px breakpoints. | [#8](https://github.com/sheetstone/myexpectpay/issues/8) |
+| P02 | Firestore data layer + all API routes | `GET/POST/PATCH/DELETE` for banks, cases, recipients, payments, messages | Phase 02 |
+| P03-A | Bank Accounts page | List sidebar + detail panel + add/edit/verify/delete modals at `/bank-accounts` | Phase 03 |
+| P03-B | Cases page | List + add/edit/delete at `/cases` | Phase 03 |
+| P03-C | Recipients page | Card grid + add/edit/delete at `/recipients` | Phase 03 |
+| P03-D | Payments page | Table + date/status filters + send/request money at `/payments` | Phase 03 |
+| P03-E | Dashboard page | Account summary + payment chart + activity calendar + recent messages at `/` | Phase 03 |
+| P03-F | Dashboard layout / nav shell | AppShell, nav sidebar, header with logout | Phase 03 |
+| P05-001 | Send Money Modal | Clicking "Send Money" opens modal calling `POST /api/payments/send`. | Phase 05 |
+| P05-002 | Request Money Modal | Clicking "Request Money" opens modal calling `POST /api/payments/request`. | Phase 05 |
+| P05-003 | Messages Page | `/messages` inbox with read/unread state. | Phase 05 |
+| P05-004 | User Profile Page | `/profile` — edit display name + change password via Firebase re-auth. | Phase 05 |
+| P05-005 | Account Settings Page | `/settings` — language switcher + delete-account flow. | Phase 05 |
+| P05-006 | Delete User Endpoint | `DELETE /api/users/me` removes all Firestore subcollections + revokes Firebase auth. | Phase 05 |
+| P05-007 | i18n DE / ES gap fill | DE and ES JSON files need all new-stack keys added. | Phase 05 |
+| P05-008 | Mobile Responsive | All pages audited at 361 / 711 / 921 / 1201 px breakpoints. | Phase 05 |
 
 ---
 
-*Generated 2026-06-27. Update Pass/Fail columns as testing progresses.*
+---
+
+*v1.0 generated 2026-06-27 for React+Express stack. v2.0 updated 2026-06-27 for Next.js monolith (Phase 01 complete). Update Pass/Fail columns as testing progresses.*
