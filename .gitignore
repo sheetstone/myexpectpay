@@ -5,12 +5,12 @@ node_modules/
 dist/
 build/
 .next/
+out/
 
 # Environment files — NEVER commit these
 .env
 .env.local
 .env.*.local
-backend/.env
 
 # Logs
 *.log
@@ -29,27 +29,23 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-# Prisma
-prisma/*.db
+# Firebase CLI local cache (not deployment config)
+.firebase/
 
 # Docker
 *.pid
 
-# Project
+# Project — AI guidance and planning docs (local only)
 .claude/
-.github/
 log/
 plan/
 CLAUDE.md
-MIGRATION_PLAN.md
-REQUIREMENTS.md
 
-#playwright
+# Playwright MCP
 .playwright-mcp/
 
-#design
+# Design files
 pencil/
-
 
 # Data migration exports (contain user data)
 scripts/firebase-export.json
