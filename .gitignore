@@ -38,8 +38,6 @@ coverage/
 # Project — AI guidance and planning docs (local only)
 .claude/
 log/
-plan/
-CLAUDE.md
 
 # Playwright MCP
 .playwright-mcp/
