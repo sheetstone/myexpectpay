@@ -1,8 +1,12 @@
 # MyExpertPay — Full Migration & Development Plan
 
-**Version:** 1.0  
-**Date:** 2026-05-02  
-**Estimated duration:** ~12 weeks (1 developer, part-time) / ~6 weeks (2 developers, full-time)
+**Version:** 2.0  
+**Date:** 2026-06-27  
+**Estimated duration:** ~10 weeks (1 developer, part-time) / ~5 weeks (1 developer, full-time)
+
+> **Architecture updated June 2026.** The original v1.0 plan targeted React + Express + PostgreSQL + Railway.
+> The project was re-architected to **Next.js 14+ + Firestore + Firebase App Hosting**.
+> See `adr/` for the decisions behind each change. The detailed task list for each phase lives in `doc/plan/phase-NN-*.md`.
 
 Legend:
 - `[MIGRATE]` — exists in old app, port to new stack
@@ -15,40 +19,32 @@ Legend:
 ## Overview — SDLC Phases
 
 ```
-Phase 0 │ Planning & Architecture      │ Week 1
-Phase 1 │ Foundation & Infrastructure  │ Week 1–2
-Phase 2 │ Backend — Core               │ Week 2–4
-Phase 3 │ Frontend — Foundation        │ Week 2–4  (parallel with Phase 2)
-Phase 4 │ Frontend — Page Migration    │ Week 4–7
-Phase 5 │ New Features (Gap Fill)      │ Week 6–9  (overlaps Phase 4)
-Phase 6 │ Testing & QA                 │ Week 8–10 (overlaps Phase 5)
-Phase 7 │ Deployment & DevOps          │ Week 10–11
-Phase 8 │ Data Migration               │ Week 11
-Phase 9 │ Launch & Post-Launch         │ Week 12+
+Phase 0 │ Planning & Architecture         │ ✅ Complete
+Phase 1 │ Next.js Foundation & Firebase   │ Week 1–2    ← start here
+Phase 2 │ Firestore Data Layer + API      │ Week 2–4
+Phase 3 │ App Router Layouts + Auth Flows │ Week 2–4    (parallel with Phase 2)
+Phase 4 │ Pages Migration to App Router   │ Week 4–7
+Phase 5 │ New Features (Gap Fill)         │ Week 6–9    (overlaps Phase 4)
+Phase 6 │ Testing & QA                    │ Week 8–10   (overlaps Phase 5)
+Phase 7 │ Firebase App Hosting Deploy     │ Week 10–11
+Phase 8 │ Data Migration (Firebase→Firestore) │ Week 11
+Phase 9 │ Launch & Post-Launch            │ Week 12+
 ```
 
 ---
 
 ## Phase 0 — Planning & Architecture ✅ (Complete)
 
-Everything in this phase is done via the docs already created in this repo.
-
 | # | Task | Status | Output |
 |---|---|---|---|
-| 0.1 | Analyse existing codebase | ✅ Done | See `/REQUIREMENTS.md` |
-| 0.2 | Write requirements document | ✅ Done | `/REQUIREMENTS.md` |
-| 0.3 | Define tech stack | ✅ Done | `/CLAUDE.md` |
-| 0.4 | Define design system | ✅ Done | `.claude/skills/design-system/SKILL.md` |
-| 0.5 | Define coding standards (frontend) | ✅ Done | `.claude/skills/frontend-best-practices/SKILL.md` |
-| 0.6 | Define coding standards (backend) | ✅ Done | `.claude/skills/backend-best-practices/SKILL.md` |
-| 0.7 | Define deployment playbook | ✅ Done | `.claude/skills/deploy/SKILL.md` |
-| 0.8 | Write this migration plan | ✅ Done | `/MIGRATION_PLAN.md` |
-
-**Open decisions before Phase 1:**
-- [ ] Confirm auth strategy: Firebase Auth (recommended) or fully custom JWT?
-- [ ] Confirm database host: Supabase managed Postgres or self-hosted?
-- [ ] Confirm routing number lookup: local JSON dataset or paid API?
-- [ ] Confirm payment processing: record-only MVP or real ACH integration?
+| 0.1 | Analyse existing codebase | ✅ Done | `doc/REQUIREMENTS.md` |
+| 0.2 | Write requirements document | ✅ Done | `doc/REQUIREMENTS.md` |
+| 0.3 | Define tech stack + architecture | ✅ Done | `CLAUDE.md`, `adr/` |
+| 0.4 | Define design system | ✅ Done | `.agents/skills/design-system/SKILL.md` |
+| 0.5 | Define coding standards | ✅ Done | `.agents/skills/frontend-best-practices/SKILL.md` |
+| 0.6 | Define deployment playbook | ✅ Done | `adr/ADR-005-firebase-app-hosting.md` |
+| 0.7 | Write migration plan | ✅ Done | `doc/MIGRATION_PLAN.md` (this file) |
+| 0.8 | Confirm all architecture decisions | ✅ Done | `adr/ADR-001` through `ADR-007` |
 
 ---
 

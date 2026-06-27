@@ -1,8 +1,10 @@
 # MyExpertPay — Project Requirements Document
 
-**Version:** 1.0  
-**Date:** 2026-05-01  
-**Stack:** React (TypeScript) + Node.js (Express) + PostgreSQL / Firebase Auth
+**Version:** 2.0  
+**Date:** 2026-06-27  
+**Stack:** Next.js 14+ (App Router, TypeScript) + Firestore + Firebase Authentication + Firebase App Hosting
+
+> **Architecture updated June 2026.** The original v1.0 plan (React + Express + PostgreSQL + Railway) was superseded. See `adr/` for the decisions behind this change.
 
 ---
 
@@ -17,47 +19,37 @@ MyExpertPay is a web application that allows users to manage their Expertpay acc
 - Communicate via in-app messages
 - View payment activity on a calendar dashboard
 
-The new version rebuilds the existing Firebase-only frontend as a full-stack application with a dedicated **Node.js/Express backend API** and a modern **React + TypeScript** frontend, replacing Firebase Realtime Database with a proper relational database.
+The new version rebuilds the existing Firebase-only frontend as a **Next.js 14+ monolith** with server-side Firestore access via the Firebase Admin SDK, Firebase Authentication (Google OAuth + email/password), and deployment on Firebase App Hosting.
 
 ---
 
 ## 2. Tech Stack
 
-### Frontend
+### Full-Stack (Next.js Monolith)
 | Layer | Technology |
 |---|---|
-| Framework | React 18+ with TypeScript |
-| Routing | React Router v6 |
-| State Management | React Query (server state) + Zustand or Context (UI state) |
-| Forms | React Hook Form + Yup |
-| UI Components | React Bootstrap or Shadcn/UI |
-| Styling | Tailwind CSS + SCSS modules |
-| Charts | Recharts or React Google Charts |
-| Calendar | React Calendar |
+| Framework | Next.js 14+ — App Router, TypeScript strict mode |
+| Rendering | React Server Components (default) + Client Components (`"use client"`) |
+| API | Next.js Route Handlers (`src/app/api/`) |
+| Server state (client) | TanStack Query |
+| Forms | React Hook Form + Zod resolver |
+| Validation | Zod (shared schemas — used on both form and Route Handler) |
+| UI Components | Shadcn/UI + custom CSS Modules |
+| Styling | Tailwind CSS + CSS Modules (`.module.css` per component) |
+| Charts | Recharts |
 | i18n | react-intl (EN, DE, ES) |
-| Auth (client) | Firebase Auth SDK (Google OAuth) or JWT-based |
-| HTTP Client | Axios |
-| Testing | Vitest + React Testing Library |
+| Testing | Vitest + React Testing Library + Playwright (E2E) |
 
-### Backend
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20 LTS |
-| Framework | Express.js (TypeScript) |
-| Database | PostgreSQL (via Prisma ORM) |
-| Auth | Firebase Admin SDK (verify Google ID tokens) or JWT |
-| Validation | Zod |
-| API Style | REST |
-| Testing | Jest + Supertest |
-| Environment | dotenv |
-
-### Infrastructure
+### Firebase / Infrastructure
 | Concern | Tool |
 |---|---|
-| Hosting (frontend) | Firebase Hosting or Vercel |
-| Hosting (backend) | Cloud Run, Railway, or Render |
-| Database | Supabase (managed Postgres) or self-hosted |
-| Auth | Firebase Authentication |
+| Auth (client) | Firebase Auth SDK — Google OAuth popup + email/password |
+| Auth (server) | Firebase Admin SDK — `verifySessionCookie`, `createSessionCookie` |
+| Session management | Firebase session cookies — HttpOnly, 5-day expiry, server-set |
+| Database | Firestore via Firebase Admin SDK (server-side only; client SDK never touches Firestore) |
+| Hosting | Firebase App Hosting (native Next.js SSR via Cloud Run) |
+| Secrets | Firebase App Hosting environment secrets |
+| Local dev | Firebase Emulator Suite (Firestore + Auth emulators) |
 | CI/CD | GitHub Actions |
 
 ---
@@ -86,7 +78,7 @@ All routes except `/login`, `/register`, and `/forgot-password` require authenti
 | AUTH-05 | Auth session persists across browser tabs and page refreshes |
 | AUTH-06 | Users can sign out from any page via the header |
 | AUTH-07 | Unauthenticated users are redirected to `/login` |
-| AUTH-08 | The backend verifies every request using a Bearer token (Firebase ID token or JWT) |
+| AUTH-08 | Every Route Handler verifies the session cookie via Firebase Admin `verifySessionCookie` |
 
 ---
 
@@ -205,7 +197,7 @@ All routes except `/login`, `/register`, and `/forgot-password` require authenti
 |---|---|---|
 | NFR-01 | Security | All API endpoints require a valid auth token; reject with 401 otherwise |
 | NFR-02 | Security | User A cannot access User B's data (row-level ownership enforced in backend) |
-| NFR-03 | Security | Input validation on both client (Yup) and server (Zod) |
+| NFR-03 | Security | Input validation on both client (Zod via React Hook Form resolver) and Route Handler (Zod) |
 | NFR-04 | Security | No sensitive credentials committed to git; use `.env` files |
 | NFR-05 | Performance | Initial page load (LCP) under 3 seconds on a standard connection |
 | NFR-06 | Performance | API responses under 500 ms for list endpoints |
@@ -223,116 +215,106 @@ All routes except `/login`, `/register`, and `/forgot-password` require authenti
 
 ## 6. Data Models
 
-### User
+All user data lives in Firestore subcollections under `users/{uid}/`. User scoping is implicit — every read and write must use the `users/{uid}/` prefix with the verified session UID.
+
+### users/{uid}/bankAccounts/{bankId}
 ```
-id           UUID (PK)
-email        string (unique)
-displayName  string
-firebaseUid  string (unique)  -- links to Firebase Auth
-createdAt    timestamp
+bankName          string
+nickname          string
+routingNumber     string (encrypted AES-256-GCM)
+accountNumber     string (encrypted AES-256-GCM)
+accountNumberLast4 string
+accountType       "checking" | "saving"
+verified          boolean
+isPrimary         boolean
+receivePayments   boolean
+sendPayments      boolean
+createdAt         Timestamp
+updatedAt         Timestamp
 ```
 
-### BankAccount
+### users/{uid}/cases/{caseId}
 ```
-id           UUID (PK)
-userId       UUID (FK → User)
-bankName     string
-routingNumber string
-accountNumber string (last 4 digits stored for display; full number encrypted)
-accountType  enum: checking | saving
-verified     boolean (default false)
-createdAt    timestamp
-updatedAt    timestamp
-```
-
-### Case
-```
-id           UUID (PK)
-userId       UUID (FK → User)
 caseNumber   string
 ncpName      string
-children     string[]   (stored as JSON array)
-createdAt    timestamp
-updatedAt    timestamp
+children     string[]
+createdAt    Timestamp
+updatedAt    Timestamp
 ```
 
-### Recipient
+### users/{uid}/recipients/{recipientId}
 ```
-id           UUID (PK)
-userId       UUID (FK → User)
 firstName    string
 lastName     string
 email        string
-caseId       UUID (FK → Case, nullable)
-createdAt    timestamp
-updatedAt    timestamp
+caseId       string | null
+createdAt    Timestamp
+updatedAt    Timestamp
 ```
 
-### Payment
+### users/{uid}/payments/{paymentId}
 ```
-id           UUID (PK)
-userId       UUID (FK → User)
-amount       decimal(10,2)
-bankId       UUID (FK → BankAccount)
-caseNumber   string
-recipientId  UUID (FK → Recipient, nullable)
+amount        number
+bankId        string
+caseNumber    string
+recipientId   string | null
 recipientName string
-paymentDate  timestamp
-status       enum: accepted | cancelled | completed | expired | in_progress | rejected | returned | reversal_in_progress | reversal_completed | reversal_rejected
-type         enum: sent | received | pending_sent | pending_received
-createdAt    timestamp
+paymentDate   Timestamp
+status        "accepted" | "cancelled" | "completed" | "expired" | "in_progress" | "rejected" | "returned" | "reversal_in_progress" | "reversal_completed" | "reversal_rejected"
+type          "sent" | "received" | "pending_sent" | "pending_received"
+note          string | null
+createdAt     Timestamp
 ```
 
-### Message
+### users/{uid}/messages/{messageId}
 ```
-id           UUID (PK)
-userId       UUID (FK → User)
-sender       string
-subject      string
-body         text
-isRead       boolean (default false)
-createdAt    timestamp
+sender     string
+subject    string
+body       string
+isRead     boolean
+createdAt  Timestamp
 ```
 
 ---
 
-## 7. API Endpoints (Backend)
+## 7. API Endpoints (Next.js Route Handlers)
+
+All Route Handlers live under `src/app/api/`. Every handler reads the session cookie and rejects with 401 if missing or invalid.
 
 ### Authentication
 ```
-POST   /api/auth/verify          -- Verify Firebase token, return user profile
-POST   /api/auth/register        -- Register new user (email/password flow)
+POST   /api/auth/session         -- Receive Firebase ID token → create session cookie (5-day)
+POST   /api/auth/logout          -- Clear session cookie + revoke Firebase refresh tokens
 ```
 
 ### Bank Accounts
 ```
 GET    /api/banks                 -- List user's bank accounts
 POST   /api/banks                 -- Add new bank account
-PATCH  /api/banks/:id             -- Update bank account
-DELETE /api/banks/:id             -- Delete bank account
-PATCH  /api/banks/:id/verify      -- Toggle verified status
-GET    /api/banks/lookup/:routing  -- Resolve bank name from routing number
+GET    /api/banks/[id]            -- Get single bank account
+PATCH  /api/banks/[id]            -- Update bank account
+DELETE /api/banks/[id]            -- Delete bank account
 ```
 
 ### Cases
 ```
 GET    /api/cases                 -- List user's cases
 POST   /api/cases                 -- Create case
-PATCH  /api/cases/:id             -- Update case
-DELETE /api/cases/:id             -- Delete case
+PATCH  /api/cases/[id]            -- Update case
+DELETE /api/cases/[id]            -- Delete case
 ```
 
 ### Recipients
 ```
 GET    /api/recipients            -- List user's recipients
 POST   /api/recipients            -- Create recipient
-PATCH  /api/recipients/:id        -- Update recipient
-DELETE /api/recipients/:id        -- Delete recipient
+PATCH  /api/recipients/[id]       -- Update recipient
+DELETE /api/recipients/[id]       -- Delete recipient
 ```
 
 ### Payments
 ```
-GET    /api/payments              -- List payments (supports ?startDate, ?endDate, ?status[], ?page, ?limit)
+GET    /api/payments              -- List payments (?startDate, ?endDate, ?status[], ?cursor, ?limit)
 POST   /api/payments/send         -- Initiate a payment (Send Money)
 POST   /api/payments/request      -- Request a payment (Request Money)
 ```
@@ -340,13 +322,17 @@ POST   /api/payments/request      -- Request a payment (Request Money)
 ### Messages
 ```
 GET    /api/messages              -- List user's messages
-PATCH  /api/messages/:id/read     -- Mark message as read
+PATCH  /api/messages/[id]/read    -- Mark message as read
 ```
 
 ### Dashboard
 ```
-GET    /api/dashboard/summary     -- Account summary (balance, totals)
-GET    /api/dashboard/activity    -- Payment activity for charting (past 30 days)
+GET    /api/dashboard             -- Account summary + payment activity (combined)
+```
+
+### Users
+```
+DELETE /api/users/me              -- Delete account (revokes session + deletes Firestore data)
 ```
 
 ---
@@ -354,52 +340,68 @@ GET    /api/dashboard/activity    -- Payment activity for charting (past 30 days
 ## 8. Project Structure
 
 ```
-myexpertpay/
-├── frontend/                   # React app
-│   ├── src/
-│   │   ├── api/                # Axios client + endpoint functions
-│   │   ├── components/         # Reusable UI components
-│   │   │   ├── Layout/         # Header, Footer, Nav
-│   │   │   ├── UI/             # DatePicker, Modal, Spinner, Pagination, etc.
-│   │   │   └── Form/           # Form field wrappers
-│   │   ├── pages/              # Route-level page components
-│   │   │   ├── Home/
-│   │   │   ├── Login/
-│   │   │   ├── BankAccount/
-│   │   │   ├── Cases/
-│   │   │   ├── Recipients/
-│   │   │   └── Payments/
-│   │   ├── hooks/              # Custom React hooks
-│   │   ├── store/              # Zustand stores (auth, UI state)
-│   │   ├── translations/       # en.json, de.json, es.json
-│   │   ├── utils/              # formatMoney, validateRouting, etc.
-│   │   ├── types/              # Shared TypeScript interfaces
-│   │   └── App.tsx
-│   ├── public/
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── backend/                    # Node.js/Express app
-│   ├── src/
-│   │   ├── routes/             # Express routers per resource
-│   │   ├── controllers/        # Request handlers
-│   │   ├── services/           # Business logic
-│   │   ├── middleware/         # Auth, error handling, logging
-│   │   ├── prisma/             # Prisma schema + migrations
-│   │   ├── validators/         # Zod schemas
-│   │   ├── types/              # Shared TypeScript types
-│   │   └── app.ts              # Express app setup
-│   ├── tests/
-│   ├── .env.example
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── .github/
-│   └── workflows/
-│       └── ci.yml              # Lint, test, build on PR
-│
-└── README.md
+myexpectpay/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/                  # Unauthenticated layout group
+│   │   │   ├── layout.tsx
+│   │   │   ├── login/page.tsx
+│   │   │   ├── register/page.tsx
+│   │   │   └── forgot-password/page.tsx
+│   │   ├── (dashboard)/             # Authenticated layout group (auth guard)
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx             # Dashboard
+│   │   │   ├── bank-accounts/
+│   │   │   ├── cases/
+│   │   │   ├── recipients/
+│   │   │   ├── payments/
+│   │   │   ├── messages/
+│   │   │   ├── profile/
+│   │   │   └── settings/
+│   │   └── api/                     # Route Handlers
+│   │       ├── auth/session/route.ts
+│   │       ├── auth/logout/route.ts
+│   │       ├── banks/route.ts
+│   │       ├── banks/[id]/route.ts
+│   │       ├── cases/route.ts
+│   │       ├── cases/[id]/route.ts
+│   │       ├── recipients/route.ts
+│   │       ├── recipients/[id]/route.ts
+│   │       ├── payments/route.ts
+│   │       ├── payments/send/route.ts
+│   │       ├── payments/request/route.ts
+│   │       ├── messages/route.ts
+│   │       ├── messages/[id]/read/route.ts
+│   │       ├── dashboard/route.ts
+│   │       └── users/me/route.ts
+│   ├── components/
+│   │   ├── layout/              # AppShell, Header, Nav, Footer
+│   │   └── ui/                  # Modal, Spinner, Pagination, Toast, EmptyState
+│   ├── lib/
+│   │   ├── firebase/
+│   │   │   ├── admin.ts         # Firebase Admin SDK singleton (server-only)
+│   │   │   └── client.ts        # Firebase client SDK (auth only, "use client")
+│   │   ├── firestore/           # Data access layer (one file per collection)
+│   │   │   ├── banks.ts
+│   │   │   ├── cases.ts
+│   │   │   ├── recipients.ts
+│   │   │   ├── payments.ts
+│   │   │   └── messages.ts
+│   │   ├── schemas/             # Shared Zod schemas (forms + Route Handlers)
+│   │   └── session.ts           # getSession() — reads cookie, returns uid
+│   ├── middleware.ts            # Route protection (verify session cookie)
+│   ├── hooks/                   # Client-side hooks only
+│   ├── translations/            # en.json, de.json, es.json
+│   ├── types/                   # Shared TypeScript interfaces
+│   ├── constants.ts             # PAGE_SIZE, ABA regex, limits
+│   └── utils/                   # formatMoney, validateRouting, formatDate
+├── adr/                         # Architecture Decision Records
+├── doc/                         # Project documentation
+├── .github/workflows/ci.yml     # Lint → type-check → test → build
+├── firebase.json
+├── apphosting.yaml              # Firebase App Hosting config
+├── firestore.rules              # deny all (Admin SDK bypasses rules)
+└── firestore.indexes.json
 ```
 
 ---
@@ -420,10 +422,12 @@ The following features are explicitly **not** in scope for the initial release:
 
 ## 10. Open Questions
 
-1. **Auth strategy:** Keep Firebase Auth (Google OAuth + email/password) or switch to a fully custom JWT flow in the Node.js backend? Firebase Auth is recommended to keep auth complexity low.
-2. **Database hosting:** Supabase (managed Postgres, generous free tier) or self-hosted Postgres on the same cloud provider as the backend?
-3. **Routing number lookup:** Use a local JSON dataset of ABA routing numbers or a paid third-party API for real-time lookup?
-4. **Account number storage:** Should the full account number be stored (encrypted) or only the last 4 digits for display?
-5. **Balance source:** Is account balance fetched from the Expertpay core system via an external API, or is it managed internally in the database?
-6. **Send / Request Money:** Does this integrate with a payment processor (e.g., Stripe, Plaid, ACH) or is it a record-only operation?
-7. **Multi-language priority:** Is full DE/ES translation coverage required for v1.0 or just EN?
+| # | Question | Decision |
+|---|---|---|
+| 1 | Auth strategy | ✅ Firebase Auth — Google OAuth + email/password (see ADR-003) |
+| 2 | Database | ✅ Firestore — no separate DB server (see ADR-002) |
+| 3 | Routing number lookup | Local ABA JSON dataset — no API key needed |
+| 4 | Account number storage | ✅ Full number stored AES-256-GCM encrypted; last 4 only in API responses |
+| 5 | Balance source | Record-only for v1 — balance derived from payments in Firestore |
+| 6 | Send / Request Money | Record-only operation for v1 — no ACH or payment processor |
+| 7 | Multi-language priority | Full EN required for v1; DE/ES best-effort |
