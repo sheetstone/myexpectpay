@@ -1,0 +1,82 @@
+:root {
+  /* ── Brand ──────────────────────────────────────────────────── */
+  --color-primary:        #2fa898;
+  --color-primary-light:  #e6f7f5;
+  --color-primary-dark:   #1d7e70;
+  --color-secondary:      #b95b8a;
+  --color-secondary-light:#faeef5;
+
+  /* ── Semantic ───────────────────────────────────────────────── */
+  --color-success:        #2fa898;
+  --color-warning:        #f59e42;
+  --color-danger:         #e05252;
+  --color-info:           #4b96ac;
+
+  /* ── Neutrals ───────────────────────────────────────────────── */
+  --color-bg:             #f7f8fa;
+  --color-surface:        #ffffff;
+  --color-border:         #e0e3e8;
+  --color-border-dashed:  #d0d5dd;
+
+  /* ── Text ───────────────────────────────────────────────────── */
+  --color-text-primary:   #374151;
+  --color-text-secondary: #6b7280;
+  --color-text-muted:     #9ca3af;
+  --color-text-heading:   #1f2937;
+  --color-text-inverse:   #ffffff;
+
+  /* ── Amounts ────────────────────────────────────────────────── */
+  --color-amount-positive: #1d7e70;
+  --color-amount-negative: #e05252;
+  --color-amount-pending:  #f59e42;
+
+  /* ── Calendar ───────────────────────────────────────────────── */
+  --color-today-badge:    var(--color-primary);
+
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-body: 'Roboto', 'Inter', system-ui, sans-serif;
+  --font-ui:   'Inter', 'Roboto', system-ui, sans-serif;
+  --font-mono: 'Roboto Mono', 'Fira Code', monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.825rem;
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.5rem;
+  --text-4xl:  2.25rem;
+
+  --weight-light:  300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold:   700;
+
+  /* ── Spacing (4px base) ─────────────────────────────────────── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --header-height:    70px;
+  --nav-indicator-h:  3px;
+  --content-max-w:    1200px;
+
+  /* ── Border radius ──────────────────────────────────────────── */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ────────────────────────────────────────────────── */
+  --shadow-sm:        0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:        0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:        0 10px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+  --shadow-card-hover:0 6px 20px rgba(47,168,152,0.12), 0 2px 6px rgba(0,0,0,0.06);
+}

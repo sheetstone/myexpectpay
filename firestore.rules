@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All access is denied for the client SDK.
+    // Data is accessed exclusively via the Firebase Admin SDK (server-side).
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
