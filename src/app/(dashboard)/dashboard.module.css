@@ -1,0 +1,237 @@
+.root {
+  max-width: var(--content-max-w);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ── Greeting ── */
+.greeting {
+  font-size: 24px;
+  font-weight: var(--weight-light);
+  color: var(--color-text-heading);
+  margin: 0;
+}
+
+/* ── Stat cards ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.statCard {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.statLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.statValue {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-heading);
+  line-height: 1.2;
+}
+
+.statValue.sent { color: var(--color-danger); }
+.statValue.received { color: var(--color-success); }
+.statValue.pending { color: var(--color-warning); }
+
+/* ── Chart panel ── */
+.chartPanel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.panelTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.chartToggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.toggleBtn {
+  padding: var(--space-1) var(--space-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  transition: background 0.15s, color 0.15s;
+}
+.toggleBtn:not(:first-child) { border-left: 1px solid var(--color-border); }
+.toggleBtn.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ── Bottom row ── */
+.bottomRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 768px) {
+  .bottomRow { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+/* ── Activity Calendar ── */
+.calMonthLabel {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-3);
+}
+
+.calDayNames {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: var(--space-2);
+}
+
+.calDayName {
+  text-align: center;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calCell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+}
+
+.calCell.active {
+  background: var(--color-primary);
+  color: #fff;
+  font-weight: var(--weight-medium);
+}
+
+.calCell.empty {
+  background: transparent;
+  color: transparent;
+}
+
+.calNoEvents {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--space-6) 0;
+}
+
+/* ── Recent Messages ── */
+.msgList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.msgItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.msgItem:hover { background: var(--color-border); }
+.msgItem.unread { border-left-color: var(--color-primary); }
+
+.msgSender {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-heading);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.msgDate {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: var(--weight-normal);
+}
+
+.msgSubject {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.msgFooter {
+  margin-top: var(--space-3);
+  text-align: right;
+}
+
+.viewAllBtn {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.viewAllBtn:hover { text-decoration: underline; }

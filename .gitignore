@@ -50,6 +50,7 @@ pencil/
 
 # Data migration exports (contain user data)
 scripts/firebase-export.json
+myexpertpay-firebase-adminsdk.json
 
 # HTTP test files (may contain tokens)
 *.http

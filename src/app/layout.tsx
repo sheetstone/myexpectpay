@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Roboto, Inter } from "next/font/google"
 import { IntlProvider } from "@/components/providers/IntlProvider"
 import { AuthProvider } from "@/components/providers/AuthProvider"
+import { QueryProvider } from "@/components/providers/QueryProvider"
 import { ToastProvider } from "@/components/ui"
 import "./globals.css"
 
@@ -28,9 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${roboto.variable} ${inter.variable}`}>
       <body>
         <IntlProvider>
-          <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </AuthProvider>
+          </QueryProvider>
         </IntlProvider>
       </body>
     </html>
