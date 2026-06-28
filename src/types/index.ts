@@ -177,16 +177,19 @@ export interface MessagesResponse {
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
-export interface DashboardSummary {
-  balance: number
-  totalSent: number
-  totalReceived: number
-  pendingCount: number
-  unreadMessageCount: number
-  recentActivity: ActivityEntry[]
+export interface ChartDataItem {
+  month: string
+  sent: number
+  received: number
 }
 
-export interface ActivityEntry {
-  date: string
-  count: number
+export interface DashboardResponse {
+  balance: number
+  totalSentThisMonth: number
+  totalReceivedThisMonth: number
+  pendingCount: number
+  unreadMessageCount: number
+  recentMessages: Pick<Message, "id" | "sender" | "subject" | "isRead" | "createdAt">[]
+  chart: ChartDataItem[]
+  calendarActivity: string[]
 }
