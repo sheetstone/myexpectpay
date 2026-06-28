@@ -5,6 +5,8 @@
   "nav.recipients": "Destinatarios",
   "nav.payments": "Pagos",
   "nav.messages": "Mensajes",
+  "nav.profile": "Perfil",
+  "nav.settings": "Configuración",
   "nav.logo": "Logo de MyExpertPay",
 
   "common.loading": "Cargando…",
@@ -49,6 +51,9 @@
   "auth.sendResetLink": "Enviar enlace",
   "auth.checkYourEmail": "Revisa tu correo",
   "auth.checkYourEmailDesc": "Enviamos un enlace de restablecimiento a {email}",
+  "auth.rememberMe": "Recordarme",
+  "auth.showPassword": "Mostrar contraseña",
+  "auth.hidePassword": "Ocultar contraseña",
   "auth.backToLogin": "Volver al inicio de sesión",
   "auth.feature1": "ExpertPay permite a los empleadores enviar electrónicamente los pagos de manutención infantil que deben retener de los cheques de pago de los empleados.",
   "auth.feature2": "Con su cuenta ExpertPay puede guardar y mantener información de pagos de empleados para transacciones rápidas.",

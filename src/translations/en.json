@@ -5,6 +5,8 @@
   "nav.recipients": "Recipients",
   "nav.payments": "Payments",
   "nav.messages": "Messages",
+  "nav.profile": "Profile",
+  "nav.settings": "Settings",
   "nav.logo": "MyExpertPay logo",
 
   "common.loading": "Loading…",
@@ -49,6 +51,9 @@
   "auth.sendResetLink": "Send reset link",
   "auth.checkYourEmail": "Check your email",
   "auth.checkYourEmailDesc": "We sent a password reset link to {email}",
+  "auth.rememberMe": "Remember me",
+  "auth.showPassword": "Show password",
+  "auth.hidePassword": "Hide password",
   "auth.backToLogin": "Back to sign in",
   "auth.feature1": "ExpertPay allows employers to electronically submit child support payments they are required to withhold from employees' paychecks.",
   "auth.feature2": "With your ExpertPay account you can save and maintain employee payment information for quick transactions.",

@@ -5,6 +5,8 @@
   "nav.recipients": "Empfänger",
   "nav.payments": "Zahlungen",
   "nav.messages": "Nachrichten",
+  "nav.profile": "Profil",
+  "nav.settings": "Einstellungen",
   "nav.logo": "MyExpertPay Logo",
 
   "common.loading": "Laden…",
@@ -49,6 +51,9 @@
   "auth.sendResetLink": "Link senden",
   "auth.checkYourEmail": "E-Mail prüfen",
   "auth.checkYourEmailDesc": "Wir haben einen Link zum Zurücksetzen an {email} gesendet.",
+  "auth.rememberMe": "Angemeldet bleiben",
+  "auth.showPassword": "Passwort anzeigen",
+  "auth.hidePassword": "Passwort verbergen",
   "auth.backToLogin": "Zurück zur Anmeldung",
   "auth.feature1": "ExpertPay ermöglicht Arbeitgebern die elektronische Übermittlung von Unterhaltszahlungen, die vom Gehalt der Mitarbeiter einbehalten werden.",
   "auth.feature2": "Mit Ihrem ExpertPay-Konto können Sie Mitarbeiterzahlungsinformationen für schnelle Transaktionen speichern und verwalten.",
