@@ -2,15 +2,20 @@ import { getApps, initializeApp, cert, type App } from "firebase-admin/app"
 import { getAuth, type Auth } from "firebase-admin/auth"
 import { getFirestore, type Firestore } from "firebase-admin/firestore"
 
-let _app: App | undefined
-let _auth: Auth | undefined
-let _db: Firestore | undefined
+// Store on globalThis so HMR reloads reuse the same instance instead of
+// opening a new gRPC connection on every file save.
+type AdminGlobal = {
+  _firebaseApp?: App
+  _firebaseAuth?: Auth
+  _firebaseDb?: Firestore
+}
+const g = global as typeof global & AdminGlobal
 
 function getApp(): App {
-  if (_app) return _app
+  if (g._firebaseApp) return g._firebaseApp
   if (getApps().length > 0) {
-    _app = getApps()[0]!
-    return _app
+    g._firebaseApp = getApps()[0]!
+    return g._firebaseApp
   }
 
   const projectId = process.env.FIREBASE_PROJECT_ID
@@ -18,23 +23,23 @@ function getApp(): App {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
 
   if (projectId && clientEmail && privateKey) {
-    _app = initializeApp({
+    g._firebaseApp = initializeApp({
       credential: cert({ projectId, clientEmail, privateKey: privateKey.replace(/\\n/g, "\n") }),
     })
   } else {
     // Emulator or build-time: no credential needed
-    _app = initializeApp({ projectId: projectId ?? "demo-myexpectpay" })
+    g._firebaseApp = initializeApp({ projectId: projectId ?? "demo-myexpectpay" })
   }
 
-  return _app
+  return g._firebaseApp
 }
 
 export function getAdminAuth(): Auth {
-  if (!_auth) _auth = getAuth(getApp())
-  return _auth
+  if (!g._firebaseAuth) g._firebaseAuth = getAuth(getApp())
+  return g._firebaseAuth
 }
 
 export function getAdminDb(): Firestore {
-  if (!_db) _db = getFirestore(getApp())
-  return _db
+  if (!g._firebaseDb) g._firebaseDb = getFirestore(getApp())
+  return g._firebaseDb
 }
