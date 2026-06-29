@@ -43,10 +43,20 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
+  async function setSessionCookie(idToken: string) {
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    })
+  }
+
   const onSubmit = async (data: LoginForm) => {
     setError("")
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password)
+      const credential = await signInWithEmailAndPassword(auth, data.email, data.password)
+      const idToken = await credential.user.getIdToken()
+      await setSessionCookie(idToken)
       router.push("/")
     } catch (e) {
       const code = (e as AuthError).code
@@ -64,7 +74,9 @@ export default function LoginPage() {
     setError("")
     setGoogleLoading(true)
     try {
-      await signInWithPopup(auth, googleProvider)
+      const credential = await signInWithPopup(auth, googleProvider)
+      const idToken = await credential.user.getIdToken()
+      await setSessionCookie(idToken)
       router.push("/")
     } catch (e) {
       const code = (e as AuthError).code

@@ -49,8 +49,14 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     setError("")
     try {
-      const { user } = await createUserWithEmailAndPassword(auth, data.email, data.password)
-      await updateProfile(user, { displayName: data.displayName })
+      const credential = await createUserWithEmailAndPassword(auth, data.email, data.password)
+      await updateProfile(credential.user, { displayName: data.displayName })
+      const idToken = await credential.user.getIdToken()
+      await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      })
       router.push("/")
     } catch (e) {
       const code = (e as AuthError).code
