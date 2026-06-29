@@ -1,6 +1,25 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
 import { getSession } from "@/lib/session"
 import { getAdminDb, getAdminAuth } from "@/lib/firebase/admin"
+
+const profileSchema = z.object({
+  displayName: z.string().min(2).max(100),
+})
+
+export async function PATCH(request: NextRequest) {
+  const session = await getSession()
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const body = await request.json().catch(() => null)
+  const parsed = profileSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 })
+  }
+
+  await getAdminAuth().updateUser(session.uid, { displayName: parsed.data.displayName })
+  return NextResponse.json({ ok: true })
+}
 
 export const dynamic = "force-dynamic"
 

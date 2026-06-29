@@ -1,14 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import { Modal, Spinner, Pagination } from "@/components/ui"
+import { Modal, Spinner, Pagination, useToast } from "@/components/ui"
 import { formatMoney } from "@/utils/formatMoney"
 import { formatDate } from "@/utils/formatDate"
 import type { Payment, PaymentStatus, PaginatedResult } from "@/types"
 import { PAYMENT_STATUS } from "@/types"
 import { PAGE_SIZE } from "@/constants"
+import { SendMoneyForm } from "./SendMoneyForm"
+import { RequestMoneyForm } from "./RequestMoneyForm"
 import styles from "./payments.module.css"
 
 interface Filters {
@@ -39,6 +41,8 @@ function StatusBadge({ status }: { status: PaymentStatus }) {
 
 export function PaymentsClient() {
   const intl = useIntl()
+  const qc = useQueryClient()
+  const toast = useToast()
   const [filters, setFilters] = useState<Filters>({ startDate: "", endDate: "", status: "" })
   const [activeFilters, setActiveFilters] = useState<Filters>({ startDate: "", endDate: "", status: "" })
   const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
@@ -192,14 +196,28 @@ export function PaymentsClient() {
         </div>
       )}
 
-      {/* Send Money (coming soon) */}
+      {/* Send Money */}
       <Modal open={sendModal} title={t("payments.send")} onClose={() => setSendModal(false)}>
-        <p className={styles.comingSoon}>{t("payments.sendComingSoon")}</p>
+        <SendMoneyForm
+          onSuccess={() => {
+            setSendModal(false)
+            qc.invalidateQueries({ queryKey: ["payments"] })
+            toast.toast(t("payments.successSend"), "success")
+          }}
+          onCancel={() => setSendModal(false)}
+        />
       </Modal>
 
-      {/* Request Money (coming soon) */}
+      {/* Request Money */}
       <Modal open={requestModal} title={t("payments.request")} onClose={() => setRequestModal(false)}>
-        <p className={styles.comingSoon}>{t("payments.requestComingSoon")}</p>
+        <RequestMoneyForm
+          onSuccess={() => {
+            setRequestModal(false)
+            qc.invalidateQueries({ queryKey: ["payments"] })
+            toast.toast(t("payments.successRequest"), "success")
+          }}
+          onCancel={() => setRequestModal(false)}
+        />
       </Modal>
     </div>
   )
