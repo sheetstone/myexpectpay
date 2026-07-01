@@ -6,19 +6,19 @@ runConfig:
   maxInstances: 10
 
 env:
-  - variable: FIREBASE_PROJECT_ID
-    secret: FIREBASE_PROJECT_ID
-  - variable: FIREBASE_CLIENT_EMAIL
-    secret: FIREBASE_CLIENT_EMAIL
-  - variable: FIREBASE_PRIVATE_KEY
-    secret: FIREBASE_PRIVATE_KEY
+  # Server-side secrets — set via: firebase apphosting:secrets:set <secret-name>
+  # FIREBASE_* credentials are NOT needed here: App Hosting injects ADC automatically.
   - variable: ACCOUNT_ENCRYPTION_KEY
-    secret: ACCOUNT_ENCRYPTION_KEY
+    secret: account-encryption-key
+  - variable: SESSION_COOKIE_SECRET
+    secret: session-cookie-secret
+
+  # Public Firebase client config — safe to hardcode (not secrets)
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: ""
+    value: AIzaSyCOO40LIrww15hzVI5kHe2enhf7XwY3wFU
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: ""
+    value: myexpertpay.firebaseapp.com
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: ""
+    value: myexpertpay
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: ""
+    value: "1:904068187929:web:a24de6b3aaac161be8a788"

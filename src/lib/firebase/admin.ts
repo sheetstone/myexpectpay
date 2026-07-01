@@ -23,12 +23,16 @@ function getApp(): App {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY
 
   if (projectId && clientEmail && privateKey) {
+    // Local dev: explicit service account credentials from .env.local
     g._firebaseApp = initializeApp({
       credential: cert({ projectId, clientEmail, privateKey: privateKey.replace(/\\n/g, "\n") }),
     })
   } else {
-    // Emulator or build-time: no credential needed
-    g._firebaseApp = initializeApp({ projectId: projectId ?? "demo-myexpectpay" })
+    // Firebase App Hosting / Cloud Run: ADC is injected automatically.
+    // GCLOUD_PROJECT is set by the Cloud Run runtime; fall back to demo for emulator/CI.
+    const resolvedProjectId =
+      projectId ?? process.env.GCLOUD_PROJECT ?? "demo-myexpectpay"
+    g._firebaseApp = initializeApp({ projectId: resolvedProjectId })
   }
 
   return g._firebaseApp
