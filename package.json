@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "emulators": "firebase emulators:start --only firestore,auth",
     "dev:full": "concurrently \"npm run dev\" \"npm run emulators\"",
-    "migrate": "tsx scripts/migrate.ts"
+    "migrate": "tsx scripts/migrate.ts",
+    "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
