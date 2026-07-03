@@ -45,6 +45,10 @@ log/
 # Playwright MCP
 .playwright-mcp/
 
+# Screenshots (generated locally, not tracked)
+frontend/screenshots/
+doc/log/screenshots/
+
 # Design files
 pencil/
 
@@ -56,3 +60,5 @@ myexpertpay-firebase-adminsdk.json
 *.http
 
 tsconfig.tsbuildinfo
+
+

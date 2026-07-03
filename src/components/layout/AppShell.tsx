@@ -5,12 +5,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useIntl } from "react-intl"
 import {
-  Squares2X2Icon,
+  HomeIcon,
   BuildingLibraryIcon,
   FolderIcon,
   UsersIcon,
-  CurrencyDollarIcon,
-  InboxIcon,
+  CreditCardIcon,
+  EnvelopeIcon,
   UserCircleIcon,
   Cog6ToothIcon,
   Bars3Icon,
@@ -29,12 +29,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/", labelKey: "nav.home", icon: Squares2X2Icon, exact: true },
+  { href: "/", labelKey: "nav.home", icon: HomeIcon, exact: true },
   { href: "/bank-accounts", labelKey: "nav.bankAccounts", icon: BuildingLibraryIcon },
   { href: "/cases", labelKey: "nav.cases", icon: FolderIcon },
   { href: "/recipients", labelKey: "nav.recipients", icon: UsersIcon },
-  { href: "/payments", labelKey: "nav.payments", icon: CurrencyDollarIcon },
-  { href: "/messages", labelKey: "nav.messages", icon: InboxIcon },
+  { href: "/payments", labelKey: "nav.payments", icon: CreditCardIcon },
+  { href: "/messages", labelKey: "nav.messages", icon: EnvelopeIcon },
   { href: "/profile", labelKey: "nav.profile", icon: UserCircleIcon },
   { href: "/settings", labelKey: "nav.settings", icon: Cog6ToothIcon },
 ]
@@ -66,7 +66,15 @@ export function AppShell({ user, children }: AppShellProps) {
       {/* Sidebar */}
       <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
         <div className={styles.logoRow}>
-          <span className={styles.logo}>MyExpertPay</span>
+          <span className={styles.logo}>
+            <span className={styles.logoMark} aria-hidden>
+              <span className={styles.logoBar} />
+              <span className={styles.logoBar} />
+              <span className={styles.logoBar} />
+              <span className={styles.logoBar} />
+            </span>
+            MyExpertPay
+          </span>
           <button
             className={styles.closeBtn}
             onClick={() => setSidebarOpen(false)}
