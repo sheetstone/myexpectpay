@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { screen } from "@testing-library/react"
-import { renderWithIntl } from "@/test/renderWithIntl"
+import { renderWithProviders } from "@/test/testWrapper"
 import ForgotPasswordPage from "../forgot-password/page"
 
 vi.mock("next/navigation", () => ({
@@ -15,7 +15,7 @@ vi.mock("firebase/auth", () => ({
 
 describe("ForgotPasswordPage — required elements", () => {
   beforeEach(() => {
-    renderWithIntl(<ForgotPasswordPage />)
+    renderWithProviders(<ForgotPasswordPage />)
   })
 
   it("renders a heading", () => {

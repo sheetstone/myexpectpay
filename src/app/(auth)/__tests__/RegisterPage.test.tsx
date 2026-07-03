@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { screen } from "@testing-library/react"
-import { renderWithIntl } from "@/test/renderWithIntl"
+import { renderWithProviders } from "@/test/testWrapper"
 import RegisterPage from "../register/page"
 
 vi.mock("next/navigation", () => ({
@@ -16,7 +16,7 @@ vi.mock("firebase/auth", () => ({
 
 describe("RegisterPage — required elements", () => {
   beforeEach(() => {
-    renderWithIntl(<RegisterPage />)
+    renderWithProviders(<RegisterPage />)
   })
 
   it("renders a heading", () => {

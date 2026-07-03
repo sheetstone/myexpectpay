@@ -6,14 +6,6 @@ export interface PaginatedResult<T> {
   hasMore: boolean
 }
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
-export interface AuthUser {
-  uid: string
-  email: string | undefined
-  displayName: string | undefined
-}
-
 // ── Bank Accounts ─────────────────────────────────────────────────────────────
 
 export type AccountType = "checking" | "saving"

@@ -65,12 +65,6 @@ export async function listPayments(
   return { items, nextCursor: hasMore ? docs[limit - 1]!.id : null, hasMore }
 }
 
-export async function getPayment(uid: string, id: string): Promise<Payment | null> {
-  const doc = await paymentsCol(uid).doc(id).get()
-  if (!doc.exists) return null
-  return docToPayment(doc.id, doc.data()!)
-}
-
 export async function createSendPayment(
   uid: string,
   input: SendPaymentInput,

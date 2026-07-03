@@ -50,7 +50,19 @@ export async function DELETE() {
   }
 
   await userRef.delete()
-  await getAdminAuth().revokeRefreshTokens(uid)
 
-  return new NextResponse(null, { status: 204 })
+  // Fully remove the auth identity. deleteUser also invalidates all
+  // sessions/refresh tokens, so an explicit revoke is unnecessary.
+  await getAdminAuth().deleteUser(uid)
+
+  // Clear the session cookie so the browser isn't left holding a stale one.
+  const response = new NextResponse(null, { status: 204 })
+  response.cookies.set("session", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 0,
+    path: "/",
+  })
+  return response
 }
