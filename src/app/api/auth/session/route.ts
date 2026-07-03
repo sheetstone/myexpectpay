@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     })
 
     return response
-  } catch {
+  } catch (err) {
+    console.error("[session] createSessionCookie failed:", err)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 }

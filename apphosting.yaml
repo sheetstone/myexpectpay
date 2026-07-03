@@ -22,3 +22,7 @@ env:
     value: myexpertpay
   - variable: NEXT_PUBLIC_FIREBASE_APP_ID
     value: "1:904068187929:web:a24de6b3aaac161be8a788"
+
+  # Server-side project ID for Firebase Admin SDK (not a secret — matches NEXT_PUBLIC above)
+  - variable: FIREBASE_PROJECT_ID
+    value: myexpertpay

@@ -29,9 +29,13 @@ function getApp(): App {
     })
   } else {
     // Firebase App Hosting / Cloud Run: ADC is injected automatically.
-    // GCLOUD_PROJECT is set by the Cloud Run runtime; fall back to demo for emulator/CI.
+    // Try all known project-ID env vars before falling back to the demo project.
     const resolvedProjectId =
-      projectId ?? process.env.GCLOUD_PROJECT ?? "demo-myexpectpay"
+      projectId ??
+      process.env.GCLOUD_PROJECT ??
+      process.env.GOOGLE_CLOUD_PROJECT ??
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ??
+      "demo-myexpectpay"
     g._firebaseApp = initializeApp({ projectId: resolvedProjectId })
   }
 
