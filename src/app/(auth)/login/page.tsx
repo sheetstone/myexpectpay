@@ -44,11 +44,12 @@ export default function LoginPage() {
   })
 
   async function setSessionCookie(idToken: string) {
-    await fetch("/api/auth/session", {
+    const res = await fetch("/api/auth/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ idToken }),
     })
+    if (!res.ok) throw new Error("session_failed")
   }
 
   const onSubmit = async (data: LoginForm) => {
@@ -57,6 +58,7 @@ export default function LoginPage() {
       const credential = await signInWithEmailAndPassword(auth, data.email, data.password)
       const idToken = await credential.user.getIdToken()
       await setSessionCookie(idToken)
+      router.refresh()
       router.push("/")
     } catch (e) {
       const code = (e as AuthError).code
@@ -77,10 +79,21 @@ export default function LoginPage() {
       const credential = await signInWithPopup(auth, googleProvider)
       const idToken = await credential.user.getIdToken()
       await setSessionCookie(idToken)
+      router.refresh()
       router.push("/")
     } catch (e) {
       const code = (e as AuthError).code
-      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+      if (
+        code === "auth/unauthorized-domain" ||
+        code === "auth/operation-not-allowed"
+      ) {
+        setError(
+          "Google Sign-In is not enabled for this domain. Please contact support.",
+        )
+      } else if (
+        code !== "auth/popup-closed-by-user" &&
+        code !== "auth/cancelled-popup-request"
+      ) {
         setError(intl.formatMessage({ id: "common.error" }))
       }
     } finally {
