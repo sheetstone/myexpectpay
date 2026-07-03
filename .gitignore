@@ -54,3 +54,5 @@ myexpertpay-firebase-adminsdk.json
 
 # HTTP test files (may contain tokens)
 *.http
+
+tsconfig.tsbuildinfo
