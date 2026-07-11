@@ -19,7 +19,7 @@ import { useAuth } from "@/components/providers/AuthProvider"
 import { Spinner } from "@/components/ui"
 import { formatMoney } from "@/utils/formatMoney"
 import { formatDate } from "@/utils/formatDate"
-import type { DashboardResponse } from "@/types"
+import type { DashboardResponse, CalendarEvent } from "@/types"
 import styles from "./dashboard.module.css"
 
 type Tab = "summary" | "calendar" | "messages"
@@ -29,6 +29,16 @@ async function fetchDashboard(): Promise<DashboardResponse> {
   const res = await fetch("/api/dashboard")
   if (!res.ok) throw new Error("Failed to load dashboard")
   return res.json()
+}
+
+// paymentDate is a plain YYYY-MM-DD string with no time component; parsing it with
+// `new Date(string)` reads it as UTC midnight and can shift the displayed day
+// backward in timezones behind UTC, so build the Date from local components instead.
+function formatEventDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number)
+  return new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", year: "numeric" }).format(
+    new Date(y, m - 1, d)
+  )
 }
 
 function TabBtn({
@@ -57,6 +67,7 @@ export function DashboardClient() {
   const now = new Date()
   const [calYear, setCalYear] = useState(now.getFullYear())
   const [calMonth, setCalMonth] = useState(now.getMonth())
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboard"],
@@ -96,20 +107,28 @@ export function DashboardClient() {
   const isCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth()
   const today = now.getDate()
   const calMonthKey = `${calYear}-${String(calMonth + 1).padStart(2, "0")}`
-  const activeSet = new Set(
-    data.calendarActivity.filter((d) => d.slice(0, 7) === calMonthKey).map((d) => d.slice(8))
-  )
-  const hasEventsThisMonth = activeSet.size > 0
+  const monthEvents = data.calendarEvents.filter((e) => e.paymentDate.slice(0, 7) === calMonthKey)
+  const eventsByDay = new Map<string, CalendarEvent[]>()
+  for (const event of monthEvents) {
+    const day = event.paymentDate.slice(8, 10)
+    const dayEvents = eventsByDay.get(day)
+    if (dayEvents) dayEvents.push(event)
+    else eventsByDay.set(day, [event])
+  }
+  const hasEventsThisMonth = monthEvents.length > 0
   const DAY_NAMES = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+  const MAX_VISIBLE_EVENTS = 3
 
   function prevCalMonth() {
     if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11) }
     else setCalMonth((m) => m - 1)
+    setSelectedEvent(null)
   }
 
   function nextCalMonth() {
     if (calMonth === 11) { setCalYear((y) => y + 1); setCalMonth(0) }
     else setCalMonth((m) => m + 1)
+    setSelectedEvent(null)
   }
 
   const money = (n: number) =>
@@ -258,24 +277,72 @@ export function DashboardClient() {
               ))}
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const day = String(i + 1).padStart(2, "0")
-                const isActive = activeSet.has(day)
+                const dayEvents = eventsByDay.get(day) ?? []
                 const isToday = isCurrentMonth && i + 1 === today
                 return (
-                  <span
-                    key={i}
-                    className={[
-                      styles.calCell,
-                      isActive ? styles.calActive : "",
-                      isToday && !isActive ? styles.calToday : "",
-                    ].join(" ")}
-                  >
-                    {i + 1}
-                  </span>
+                  <div key={i} className={styles.calCell}>
+                    <span className={`${styles.calDayNum}${isToday ? ` ${styles.calTodayBadge}` : ""}`}>
+                      {i + 1}
+                    </span>
+                    {dayEvents.length > 0 && (
+                      <ul className={styles.calEventList}>
+                        {dayEvents.slice(0, MAX_VISIBLE_EVENTS).map((event) => (
+                          <li key={event.id}>
+                            <button
+                              type="button"
+                              className={`${styles.calEventItem}${selectedEvent?.id === event.id ? ` ${styles.calEventActive}` : ""}`}
+                              onClick={() =>
+                                setSelectedEvent((prev) => (prev?.id === event.id ? null : event))
+                              }
+                            >
+                              {event.recipientName}
+                            </button>
+                          </li>
+                        ))}
+                        {dayEvents.length > MAX_VISIBLE_EVENTS && (
+                          <li className={styles.calMoreLabel}>
+                            {fmt("dashboard.moreEvents", { count: String(dayEvents.length - MAX_VISIBLE_EVENTS) })}
+                          </li>
+                        )}
+                      </ul>
+                    )}
+                  </div>
                 )
               })}
             </div>
             {!hasEventsThisMonth && (
               <p className={styles.calNoEvents}>{fmt("dashboard.noEvents")}</p>
+            )}
+            {selectedEvent && (
+              <div className={styles.calDetail}>
+                <div className={styles.calDetailHeader}>
+                  <span>{formatEventDate(selectedEvent.paymentDate)}</span>
+                  <button
+                    type="button"
+                    className={styles.calDetailCloseBtn}
+                    onClick={() => setSelectedEvent(null)}
+                    aria-label={fmt("common.close")}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className={styles.calDetailRow}>
+                  <span className={styles.calDetailLabel}>{fmt("payments.recipient")}</span>
+                  <span>{selectedEvent.recipientName}</span>
+                </div>
+                <div className={styles.calDetailRow}>
+                  <span className={styles.calDetailLabel}>{fmt("payments.amount")}</span>
+                  <span>${money(selectedEvent.amount)}</span>
+                </div>
+                <div className={styles.calDetailRow}>
+                  <span className={styles.calDetailLabel}>{fmt("payments.caseNumber")}</span>
+                  <span>{selectedEvent.caseNumber}</span>
+                </div>
+                <div className={styles.calDetailRow}>
+                  <span className={styles.calDetailLabel}>{fmt("payments.filterByStatus")}</span>
+                  <span>{fmt(`payments.status.${selectedEvent.status}`)}</span>
+                </div>
+              </div>
             )}
           </div>
         )}

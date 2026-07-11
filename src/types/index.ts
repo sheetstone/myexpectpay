@@ -175,6 +175,11 @@ export interface ChartDataItem {
   received: number
 }
 
+export type CalendarEvent = Pick<
+  Payment,
+  "id" | "amount" | "caseNumber" | "recipientName" | "paymentDate" | "status" | "type"
+>
+
 export interface DashboardResponse {
   balance: number
   totalSentThisMonth: number
@@ -183,5 +188,5 @@ export interface DashboardResponse {
   unreadMessageCount: number
   recentMessages: Pick<Message, "id" | "sender" | "subject" | "isRead" | "createdAt">[]
   chart: ChartDataItem[]
-  calendarActivity: string[]
+  calendarEvents: CalendarEvent[]
 }
