@@ -6,7 +6,8 @@ import { useIntl } from "react-intl"
 import { PlusIcon } from "@heroicons/react/24/outline"
 import { Modal, ConfirmDialog, Spinner, useToast } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
-import type { BankAccount, PaginatedResult } from "@/types"
+import { formatMoney } from "@/utils/formatMoney"
+import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
 import { BankAccountForm } from "./BankAccountForm"
 import styles from "./bankAccounts.module.css"
 
@@ -14,6 +15,22 @@ async function fetchBanks(): Promise<PaginatedResult<BankAccount>> {
   const res = await fetch("/api/banks")
   if (!res.ok) throw new Error("Failed to load bank accounts")
   return res.json()
+}
+
+async function fetchBankDetail(id: string): Promise<BankAccountDetail> {
+  const res = await fetch(`/api/banks/${id}`)
+  if (!res.ok) throw new Error("Failed to load bank detail")
+  return res.json()
+}
+
+// lastActivity is a plain YYYY-MM-DD string with no time component; parsing it with
+// `new Date(string)` reads it as UTC midnight and can shift the displayed day
+// backward in timezones behind UTC, so build the Date from local components instead.
+function formatActivityDate(dateStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number)
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
+    new Date(y, m - 1, d)
+  )
 }
 
 function RoutingTag({ receive, send, styles: s }: { receive: boolean; send: boolean; styles: Record<string, string> }) {
@@ -37,6 +54,14 @@ export function BankAccountsClient() {
     queryKey: ["banks"],
     queryFn: fetchBanks,
     staleTime: 60_000,
+  })
+
+  const effectiveBankId = selectedId ?? data?.items[0]?.id ?? null
+
+  const { data: detail } = useQuery({
+    queryKey: ["banks", effectiveBankId],
+    queryFn: () => fetchBankDetail(effectiveBankId!),
+    enabled: Boolean(effectiveBankId),
   })
 
   const deleteMutation = useMutation({
@@ -183,6 +208,37 @@ export function BankAccountsClient() {
                 </button>
               </div>
             </div>
+
+            {/* Stats row */}
+            {detail && detail.id === selected.id && (
+              <div className={styles.statsRow}>
+                <div className={styles.statCell}>
+                  <span className={styles.statLabel}>{t("dashboard.totalReceived")}</span>
+                  <span className={styles.statValue}>{formatMoney(detail.stats.totalReceived)}</span>
+                </div>
+                <div className={styles.statCell}>
+                  <span className={styles.statLabel}>{t("dashboard.totalSent")}</span>
+                  <span className={styles.statValue}>{formatMoney(detail.stats.totalSent)}</span>
+                </div>
+                <div className={styles.statCell}>
+                  <span className={styles.statLabel}>{t("bankAccount.linkedCases")}</span>
+                  <span className={styles.statValueSm}>{detail.stats.linkedCases}</span>
+                  <span className={styles.statSub}>
+                    {t("bankAccount.activeCases", { count: detail.stats.linkedCases })}
+                  </span>
+                </div>
+                <div className={styles.statCell}>
+                  <span className={styles.statLabel}>{t("bankAccount.usedFor")}</span>
+                  <span className={styles.statValueSm}>
+                    <RoutingTag receive={selected.receivePayments} send={selected.sendPayments} styles={styles} />
+                  </span>
+                  <span className={styles.statSub}>
+                    {t("bankAccount.lastActivity")}{" "}
+                    {detail.stats.lastActivity ? formatActivityDate(detail.stats.lastActivity) : t("bankAccount.noActivity")}
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Info grid */}
             <div className={styles.infoGrid}>
