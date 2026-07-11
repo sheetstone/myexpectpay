@@ -25,6 +25,7 @@
   "common.saveSuccess": "Changes saved.",
   "common.deleteSuccess": "Deleted successfully.",
   "common.clearFilters": "Clear filters",
+  "common.close": "Close",
 
   "auth.signIn": "Sign In",
   "auth.signOut": "Sign Out",
@@ -75,6 +76,7 @@
   "dashboard.noEvents": "No events this month",
   "dashboard.previousMonth": "Previous month",
   "dashboard.nextMonth": "Next month",
+  "dashboard.moreEvents": "+{count} more",
 
   "bankAccount.title": "Bank Accounts",
   "bankAccount.add": "New Bank Account",

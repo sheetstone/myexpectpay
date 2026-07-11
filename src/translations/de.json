@@ -25,6 +25,7 @@
   "common.saveSuccess": "Änderungen gespeichert.",
   "common.deleteSuccess": "Erfolgreich gelöscht.",
   "common.clearFilters": "Filter löschen",
+  "common.close": "Schließen",
 
   "auth.signIn": "Anmelden",
   "auth.signOut": "Abmelden",
@@ -75,6 +76,7 @@
   "dashboard.noEvents": "Keine Ereignisse in diesem Monat",
   "dashboard.previousMonth": "Vorheriger Monat",
   "dashboard.nextMonth": "Nächster Monat",
+  "dashboard.moreEvents": "+{count} weitere",
 
   "bankAccount.title": "Bankkonten",
   "bankAccount.add": "Neues Bankkonto",

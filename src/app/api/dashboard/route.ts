@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
 import { getAdminDb } from "@/lib/firebase/admin"
 import { Timestamp } from "firebase-admin/firestore"
-import type { DashboardResponse, ChartDataItem } from "@/types"
+import type { DashboardResponse, ChartDataItem, CalendarEvent, PaymentStatus, PaymentType } from "@/types"
 
 export const dynamic = "force-dynamic"
 
@@ -34,13 +34,13 @@ export async function GET() {
   let totalSentThisMonth = 0
   let totalReceivedThisMonth = 0
   let pendingCount = 0
-  const calendarSet = new Set<string>()
+  const calendarEvents: CalendarEvent[] = []
 
   paymentsSnap.docs.forEach((doc) => {
     const data = doc.data()
     const amount = data.amount as number
-    const type = data.type as string
-    const status = data.status as string
+    const type = data.type as PaymentType
+    const status = data.status as PaymentStatus
     const paymentDate = data.paymentDate as string // YYYY-MM-DD
 
     const monthKey = paymentDate.slice(0, 7)
@@ -57,7 +57,15 @@ export async function GET() {
       if (type === "received" || type === "pending_received") totalReceivedThisMonth += amount
     }
 
-    calendarSet.add(paymentDate)
+    calendarEvents.push({
+      id: doc.id,
+      amount,
+      caseNumber: data.caseNumber as string,
+      recipientName: data.recipientName as string,
+      paymentDate,
+      status,
+      type,
+    })
   })
 
   const chart: ChartDataItem[] = Array.from(chartMap.entries()).map(([month, vals]) => ({
@@ -84,7 +92,7 @@ export async function GET() {
     unreadMessageCount: unreadSnap.data().count,
     recentMessages,
     chart,
-    calendarActivity: Array.from(calendarSet).sort(),
+    calendarEvents: calendarEvents.sort((a, b) => a.paymentDate.localeCompare(b.paymentDate)),
   }
 
   return NextResponse.json(response)
