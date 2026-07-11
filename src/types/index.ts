@@ -51,6 +51,7 @@ export interface BankStats {
 
 export interface BankAccountDetail extends BankAccount {
   stats: BankStats
+  trend: ChartDataItem[]
 }
 
 // ── Cases ─────────────────────────────────────────────────────────────────────

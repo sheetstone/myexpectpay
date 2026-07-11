@@ -5,6 +5,7 @@ import { PAGE_SIZE } from "@/constants"
 import type {
   BankAccount,
   BankStats,
+  ChartDataItem,
   CreateBankAccountInput,
   UpdateBankAccountInput,
   PaginatedResult,
@@ -90,6 +91,39 @@ export async function getBankStats(uid: string, bankId: string): Promise<BankSta
   })
 
   return { totalReceived, totalSent, linkedCases: caseNumbers.size, lastActivity }
+}
+
+export async function getBankTrend(uid: string, bankId: string): Promise<ChartDataItem[]> {
+  const paymentsSnap = await getAdminDb()
+    .collection("users")
+    .doc(uid)
+    .collection("payments")
+    .where("bankId", "==", bankId)
+    .get()
+
+  const now = new Date()
+  const chartMap = new Map<string, { sent: number; received: number }>()
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+    chartMap.set(key, { sent: 0, received: 0 })
+  }
+
+  paymentsSnap.docs.forEach((doc) => {
+    const data = doc.data()
+    const amount = data.amount as number
+    const type = data.type as string
+    const paymentDate = data.paymentDate as string
+    const monthKey = paymentDate.slice(0, 7)
+
+    const entry = chartMap.get(monthKey)
+    if (entry) {
+      if (type === "sent" || type === "pending_sent") entry.sent += amount
+      if (type === "received" || type === "pending_received") entry.received += amount
+    }
+  })
+
+  return Array.from(chartMap.entries()).map(([month, vals]) => ({ month, ...vals }))
 }
 
 export async function createBank(

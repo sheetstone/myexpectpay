@@ -122,6 +122,8 @@
   "bankAccount.activeCases": "{count} active cases",
   "bankAccount.usedFor": "Used For",
   "bankAccount.lastActivity": "Last activity",
+  "bankAccount.paymentTrend": "Payment Trend",
+  "bankAccount.twelveMonths": "12 months",
 
   "cases.title": "Case Info",
   "cases.add": "New Case",
