@@ -211,6 +211,25 @@
   letter-spacing: 0.05em;
 }
 
+.calArrowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.calArrowBtn:hover {
+  background: var(--color-bg);
+}
+
 .calDayNames {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

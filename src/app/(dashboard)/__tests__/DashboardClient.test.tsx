@@ -101,6 +101,51 @@ describe("DashboardClient — required elements", () => {
     expect(screen.getByText("Mo")).toBeInTheDocument()
   })
 
+  it("Activity Calendar tab shows Previous/Next month buttons", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<DashboardClient />)
+    await screen.findByRole("tab", { name: /activity calendar/i })
+    await user.click(screen.getByRole("tab", { name: /activity calendar/i }))
+    expect(screen.getByRole("button", { name: /previous month/i })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /next month/i })).toBeInTheDocument()
+  })
+
+  it("Next month button advances the displayed month label", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<DashboardClient />)
+    await screen.findByRole("tab", { name: /activity calendar/i })
+    await user.click(screen.getByRole("tab", { name: /activity calendar/i }))
+
+    const now = new Date()
+    const initialLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
+      .format(now)
+      .toUpperCase()
+    const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+    const nextLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
+      .format(nextMonthDate)
+      .toUpperCase()
+
+    expect(screen.getByText(initialLabel)).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: /next month/i }))
+    expect(screen.getByText(nextLabel)).toBeInTheDocument()
+  })
+
+  it("Previous month button goes back a month, wrapping the year", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<DashboardClient />)
+    await screen.findByRole("tab", { name: /activity calendar/i })
+    await user.click(screen.getByRole("tab", { name: /activity calendar/i }))
+
+    const now = new Date()
+    const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const prevLabel = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
+      .format(prevMonthDate)
+      .toUpperCase()
+
+    await user.click(screen.getByRole("button", { name: /previous month/i }))
+    expect(screen.getByText(prevLabel)).toBeInTheDocument()
+  })
+
   it("Recent Messages tab shows message senders", async () => {
     const user = userEvent.setup()
     renderWithProviders(<DashboardClient />)

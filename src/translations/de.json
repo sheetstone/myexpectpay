@@ -73,6 +73,8 @@
   "dashboard.barChart": "Balken",
   "dashboard.lineChart": "Linie",
   "dashboard.noEvents": "Keine Ereignisse in diesem Monat",
+  "dashboard.previousMonth": "Vorheriger Monat",
+  "dashboard.nextMonth": "Nächster Monat",
 
   "bankAccount.title": "Bankkonten",
   "bankAccount.add": "Neues Bankkonto",
