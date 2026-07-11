@@ -55,8 +55,9 @@ export async function GET() {
     if (monthKey === thisMonthKey) {
       if (type === "sent" || type === "pending_sent") totalSentThisMonth += amount
       if (type === "received" || type === "pending_received") totalReceivedThisMonth += amount
-      calendarSet.add(paymentDate)
     }
+
+    calendarSet.add(paymentDate)
   })
 
   const chart: ChartDataItem[] = Array.from(chartMap.entries()).map(([month, vals]) => ({

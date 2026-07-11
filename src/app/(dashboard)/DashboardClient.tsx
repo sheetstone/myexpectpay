@@ -8,6 +8,8 @@ import {
   ChartBarIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline"
 import {
   BarChart, Bar, LineChart, Line,
@@ -52,6 +54,9 @@ export function DashboardClient() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<Tab>("summary")
   const [chartType, setChartType] = useState<ChartType>("bar")
+  const now = new Date()
+  const [calYear, setCalYear] = useState(now.getFullYear())
+  const [calMonth, setCalMonth] = useState(now.getMonth())
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboard"],
@@ -86,14 +91,26 @@ export function DashboardClient() {
   }))
 
   // Calendar
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = now.getMonth()
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const firstDayOfWeek = new Date(year, month, 1).getDay()
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate()
+  const firstDayOfWeek = new Date(calYear, calMonth, 1).getDay()
+  const isCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth()
   const today = now.getDate()
-  const activeSet = new Set(data.calendarActivity.map((d) => d.slice(8)))
+  const calMonthKey = `${calYear}-${String(calMonth + 1).padStart(2, "0")}`
+  const activeSet = new Set(
+    data.calendarActivity.filter((d) => d.slice(0, 7) === calMonthKey).map((d) => d.slice(8))
+  )
+  const hasEventsThisMonth = activeSet.size > 0
   const DAY_NAMES = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
+
+  function prevCalMonth() {
+    if (calMonth === 0) { setCalYear((y) => y - 1); setCalMonth(11) }
+    else setCalMonth((m) => m - 1)
+  }
+
+  function nextCalMonth() {
+    if (calMonth === 11) { setCalYear((y) => y + 1); setCalMonth(0) }
+    else setCalMonth((m) => m + 1)
+  }
 
   const money = (n: number) =>
     intl.formatNumber(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -208,9 +225,27 @@ export function DashboardClient() {
         {activeTab === "calendar" && (
           <div className={styles.calSection}>
             <div className={styles.calHeader}>
+              <button
+                type="button"
+                className={styles.calArrowBtn}
+                onClick={prevCalMonth}
+                aria-label={fmt("dashboard.previousMonth")}
+              >
+                <ChevronLeftIcon width={16} height={16} />
+              </button>
               <span className={styles.calMonthLabel}>
-                {new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(now).toUpperCase()}
+                {new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" })
+                  .format(new Date(calYear, calMonth, 1))
+                  .toUpperCase()}
               </span>
+              <button
+                type="button"
+                className={styles.calArrowBtn}
+                onClick={nextCalMonth}
+                aria-label={fmt("dashboard.nextMonth")}
+              >
+                <ChevronRightIcon width={16} height={16} />
+              </button>
             </div>
             <div className={styles.calDayNames}>
               {DAY_NAMES.map((d) => (
@@ -224,7 +259,7 @@ export function DashboardClient() {
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const day = String(i + 1).padStart(2, "0")
                 const isActive = activeSet.has(day)
-                const isToday = i + 1 === today
+                const isToday = isCurrentMonth && i + 1 === today
                 return (
                   <span
                     key={i}
@@ -239,7 +274,7 @@ export function DashboardClient() {
                 )
               })}
             </div>
-            {data.calendarActivity.length === 0 && (
+            {!hasEventsThisMonth && (
               <p className={styles.calNoEvents}>{fmt("dashboard.noEvents")}</p>
             )}
           </div>

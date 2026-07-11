@@ -225,3 +225,23 @@ NEXT_PUBLIC_FIREBASE_APP_ID
 ACCOUNT_ENCRYPTION_KEY    ← AES-256 key for encrypting account numbers
 SESSION_COOKIE_SECRET     ← used to sign/verify session cookies
 ```
+
+## Working the design-gap backlog (issues #41–#59)
+
+These 19 issues track UI gaps found by comparing the build against the `frontend/` reference
+(see `doc/CODE_REVIEW.md` and issue #38). They are grouped under the GitHub milestone
+**"Design-gap backlog (#41–#59)"**, which is the work queue.
+
+**Flow: one issue → one branch → one PR that closes it → stop for review.** Never merge; never
+work more than one issue per run. Each new issue branches off the latest `main` (assumes prior
+gap PRs are merged during the review pause); if the target shares files with a still-open gap
+PR, flag it before proceeding.
+
+Per-issue recipe: read the `frontend/` reference + our implementation → branch → implement
+(reuse components/tokens/i18n; new APIs follow the `getSession` + Zod + `firestore/*` pattern)
+→ `npm run type-check` + `npm run test` (must pass) → before/after Playwright screenshots
+(test user `bb@gmail.com`, `POST /api/seed` for data) → log note in P04-012 → PR with
+`Closes #<n>`.
+
+The step-by-step is encoded in the local slash command `/gap-issue` (`.claude/commands/gap-issue.md`,
+git-ignored / local-only). Run `/gap-issue [number]` to work the next (or a specific) issue.
