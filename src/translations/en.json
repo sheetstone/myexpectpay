@@ -118,6 +118,10 @@
   "bankAccount.sendOnly": "Send Only",
   "bankAccount.notRouted": "Not Routed",
   "bankAccount.select": "Select a bank account",
+  "bankAccount.linkedCases": "Linked Cases",
+  "bankAccount.activeCases": "{count} active cases",
+  "bankAccount.usedFor": "Used For",
+  "bankAccount.lastActivity": "Last activity",
 
   "cases.title": "Case Info",
   "cases.add": "New Case",

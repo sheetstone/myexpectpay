@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getSession } from "@/lib/session"
-import { getBank, updateBank, deleteBank } from "@/lib/firestore/banks"
+import { getBank, getBankStats, updateBank, deleteBank } from "@/lib/firestore/banks"
 import { updateBankSchema } from "@/lib/schemas/bankSchema"
 
 export const dynamic = "force-dynamic"
@@ -15,7 +15,8 @@ export async function GET(
   const { id } = await params
   const bank = await getBank(session.uid, id)
   if (!bank) return NextResponse.json({ error: "Not found" }, { status: 404 })
-  return NextResponse.json(bank)
+  const stats = await getBankStats(session.uid, id)
+  return NextResponse.json({ ...bank, stats })
 }
 
 export async function PATCH(

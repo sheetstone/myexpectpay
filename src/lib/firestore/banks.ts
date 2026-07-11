@@ -4,6 +4,7 @@ import { encrypt, decrypt } from "@/lib/crypto"
 import { PAGE_SIZE } from "@/constants"
 import type {
   BankAccount,
+  BankStats,
   CreateBankAccountInput,
   UpdateBankAccountInput,
   PaginatedResult,
@@ -60,6 +61,35 @@ export async function getBank(uid: string, id: string): Promise<BankAccount | nu
   const doc = await banksCol(uid).doc(id).get()
   if (!doc.exists) return null
   return docToBankAccount(doc.id, doc.data()!)
+}
+
+export async function getBankStats(uid: string, bankId: string): Promise<BankStats> {
+  const paymentsSnap = await getAdminDb()
+    .collection("users")
+    .doc(uid)
+    .collection("payments")
+    .where("bankId", "==", bankId)
+    .get()
+
+  let totalReceived = 0
+  let totalSent = 0
+  let lastActivity: string | null = null
+  const caseNumbers = new Set<string>()
+
+  paymentsSnap.docs.forEach((doc) => {
+    const data = doc.data()
+    const amount = data.amount as number
+    const type = data.type as string
+    const paymentDate = data.paymentDate as string
+    const caseNumber = data.caseNumber as string | undefined
+
+    if (type === "sent" || type === "pending_sent") totalSent += amount
+    if (type === "received" || type === "pending_received") totalReceived += amount
+    if (caseNumber) caseNumbers.add(caseNumber)
+    if (!lastActivity || paymentDate > lastActivity) lastActivity = paymentDate
+  })
+
+  return { totalReceived, totalSent, linkedCases: caseNumbers.size, lastActivity }
 }
 
 export async function createBank(

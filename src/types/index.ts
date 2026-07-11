@@ -42,6 +42,17 @@ export interface UpdateBankAccountInput {
   sendPayments?: boolean
 }
 
+export interface BankStats {
+  totalReceived: number
+  totalSent: number
+  linkedCases: number
+  lastActivity: string | null
+}
+
+export interface BankAccountDetail extends BankAccount {
+  stats: BankStats
+}
+
 // ── Cases ─────────────────────────────────────────────────────────────────────
 
 export interface Case {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/testWrapper"
 import { BankAccountsClient } from "../BankAccountsClient"
 
@@ -39,6 +40,17 @@ const mockBanks = {
   nextCursor: null,
 }
 
+const mockBankDetails: Record<string, unknown> = {
+  b1: {
+    ...mockBanks.items[0],
+    stats: { totalReceived: 1200, totalSent: 300, linkedCases: 2, lastActivity: "2025-06-15" },
+  },
+  b2: {
+    ...mockBanks.items[1],
+    stats: { totalReceived: 0, totalSent: 0, linkedCases: 0, lastActivity: null },
+  },
+}
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/bank-accounts",
@@ -64,9 +76,15 @@ vi.mock("@/components/ui", async (importOriginal) => {
 })
 
 beforeEach(() => {
-  global.fetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: async () => mockBanks,
+  global.fetch = vi.fn().mockImplementation((url: string) => {
+    if (url === "/api/banks") {
+      return Promise.resolve({ ok: true, json: async () => mockBanks })
+    }
+    const match = /\/api\/banks\/(\w+)$/.exec(url)
+    if (match) {
+      return Promise.resolve({ ok: true, json: async () => mockBankDetails[match[1]!] })
+    }
+    return Promise.resolve({ ok: false })
   })
 })
 
@@ -126,5 +144,34 @@ describe("BankAccountsClient — required elements", () => {
     expect(routingEls.length).toBeGreaterThanOrEqual(1)
     const checkboxes = await screen.findAllByRole("checkbox")
     expect(checkboxes.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it("renders Total Received and Total Sent stat cells for the selected account", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText("$1,200.00")).toBeInTheDocument()
+    expect(await screen.findByText("$300.00")).toBeInTheDocument()
+  })
+
+  it("renders Linked Cases count and active-cases sub-label", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText(/linked cases/i)).toBeInTheDocument()
+    expect(await screen.findByText(/2 active cases/i)).toBeInTheDocument()
+  })
+
+  it("renders Used For and Last Activity for the selected account", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText(/used for/i)).toBeInTheDocument()
+    // b1: receivePayments true, sendPayments false — "Receive Only" also appears in the
+    // existing Routing Rules info item, so this stat cell isn't the only match.
+    const receiveOnlyEls = await screen.findAllByText(/receive only/i)
+    expect(receiveOnlyEls.length).toBeGreaterThanOrEqual(1)
+    expect(await screen.findByText(/jun 15, 2025/i)).toBeInTheDocument()
+  })
+
+  it("shows No recent activity when a bank has no payment history", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    expect(await screen.findByText(/no recent activity/i)).toBeInTheDocument()
   })
 })
