@@ -40,20 +40,35 @@ const mockBanks = {
   nextCursor: null,
 }
 
+const mockTrend = [
+  { month: "2025-05", sent: 100, received: 200 },
+  { month: "2025-06", sent: 200, received: 1000 },
+]
+
 const mockBankDetails: Record<string, unknown> = {
   b1: {
     ...mockBanks.items[0],
     stats: { totalReceived: 1200, totalSent: 300, linkedCases: 2, lastActivity: "2025-06-15" },
+    trend: mockTrend,
   },
   b2: {
     ...mockBanks.items[1],
     stats: { totalReceived: 0, totalSent: 0, linkedCases: 0, lastActivity: null },
+    trend: mockTrend,
   },
 }
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/bank-accounts",
+}))
+vi.mock("recharts", () => ({
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="trend-chart">{children}</div>,
+  Line: () => null,
+  XAxis: () => null,
+  YAxis: () => null,
+  Tooltip: () => null,
 }))
 vi.mock("@/components/ui", async (importOriginal) => {
   const orig = await importOriginal<typeof import("@/components/ui")>()
@@ -173,5 +188,12 @@ describe("BankAccountsClient — required elements", () => {
     renderWithProviders(<BankAccountsClient />)
     await user.click(await screen.findByText("Wells Fargo"))
     expect(await screen.findByText(/no recent activity/i)).toBeInTheDocument()
+  })
+
+  it("renders Payment Trend chart section with 12-month legend", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText(/payment trend/i)).toBeInTheDocument()
+    expect(await screen.findByText(/12 months/i)).toBeInTheDocument()
+    expect(await screen.findByTestId("trend-chart")).toBeInTheDocument()
   })
 })
