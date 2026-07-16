@@ -5,10 +5,13 @@ import { PAGE_SIZE } from "@/constants"
 import type {
   BankAccount,
   BankStats,
+  CalendarEvent,
   ChartDataItem,
   CreateBankAccountInput,
   UpdateBankAccountInput,
   PaginatedResult,
+  PaymentStatus,
+  PaymentType,
 } from "@/types"
 
 interface ListOptions {
@@ -124,6 +127,34 @@ export async function getBankTrend(uid: string, bankId: string): Promise<ChartDa
   })
 
   return Array.from(chartMap.entries()).map(([month, vals]) => ({ month, ...vals }))
+}
+
+export async function getBankRecentPayments(
+  uid: string,
+  bankId: string,
+  limit = 5,
+): Promise<CalendarEvent[]> {
+  const paymentsSnap = await getAdminDb()
+    .collection("users")
+    .doc(uid)
+    .collection("payments")
+    .where("bankId", "==", bankId)
+    .get()
+
+  const payments: CalendarEvent[] = paymentsSnap.docs.map((doc) => {
+    const data = doc.data()
+    return {
+      id: doc.id,
+      amount: data.amount as number,
+      caseNumber: data.caseNumber as string,
+      recipientName: data.recipientName as string,
+      paymentDate: data.paymentDate as string,
+      status: data.status as PaymentStatus,
+      type: data.type as PaymentType,
+    }
+  })
+
+  return payments.sort((a, b) => b.paymentDate.localeCompare(a.paymentDate)).slice(0, limit)
 }
 
 export async function createBank(

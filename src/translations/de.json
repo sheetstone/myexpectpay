@@ -124,6 +124,9 @@
   "bankAccount.lastActivity": "Letzte Aktivität",
   "bankAccount.paymentTrend": "Zahlungstrend",
   "bankAccount.twelveMonths": "12 Monate",
+  "bankAccount.recentTransactions": "Letzte Transaktionen",
+  "bankAccount.noTransactions": "Noch keine Transaktionen für dieses Konto.",
+  "bankAccount.viewAllPayments": "Alle Zahlungen anzeigen",
 
   "cases.title": "Fallinfo",
   "cases.add": "Neuer Fall",
@@ -164,6 +167,8 @@
   "payments.note": "Notiz",
   "payments.bank": "Bankkonto",
   "payments.type": "Typ",
+  "payments.typeSent": "Gesendet",
+  "payments.typeReceived": "Empfangen",
   "payments.filterAll": "Alle",
   "payments.clearFilters": "Filter löschen",
   "payments.filterByDate": "Datumsbereich",

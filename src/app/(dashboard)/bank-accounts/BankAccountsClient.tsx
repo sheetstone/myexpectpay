@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
 import { PlusIcon } from "@heroicons/react/24/outline"
@@ -337,6 +338,53 @@ export function BankAccountsClient() {
                     <Line type="monotone" dataKey="received" name={t("dashboard.totalReceived")} stroke="var(--color-success)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
                   </LineChart>
                 </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Recent transactions */}
+            {detail && detail.id === selected.id && (
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>{t("bankAccount.recentTransactions")}</p>
+                {detail.recentPayments.length === 0 ? (
+                  <p className={styles.txEmpty}>{t("bankAccount.noTransactions")}</p>
+                ) : (
+                  <>
+                    <table className={styles.txTable}>
+                      <thead>
+                        <tr>
+                          <th>{t("payments.paymentDate")}</th>
+                          <th>{t("payments.caseNumber")}</th>
+                          <th>{t("payments.type")}</th>
+                          <th className={styles.txAmtHeader}>{t("payments.amount")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detail.recentPayments.map((tx) => {
+                          const isReceive = tx.type === "received" || tx.type === "pending_received"
+                          return (
+                            <tr key={tx.id}>
+                              <td>{formatActivityDate(tx.paymentDate)}</td>
+                              <td>{tx.caseNumber || "—"}</td>
+                              <td>
+                                <span className={`${styles.txType}${isReceive ? ` ${styles.txTypeReceived}` : ` ${styles.txTypeSent}`}`}>
+                                  {isReceive ? t("payments.typeReceived") : t("payments.typeSent")}
+                                </span>
+                              </td>
+                              <td className={`${styles.txAmt}${isReceive ? ` ${styles.txAmtReceived}` : ` ${styles.txAmtSent}`}`}>
+                                {isReceive ? "+" : "−"}{formatMoney(tx.amount)}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                    <div className={styles.txFoot}>
+                      <Link href="/payments" className={styles.txLink}>
+                        {t("bankAccount.viewAllPayments")}
+                      </Link>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
