@@ -81,10 +81,15 @@ export function BankAccountsClient() {
     enabled: Boolean(effectiveBankId),
   })
 
-  useEffect(() => {
+  // Reset per-account UI state when the selected bank changes. Adjusted during
+  // render (rather than in a useEffect) per https://react.dev/learn/you-might-not-need-an-effect
+  // to avoid an extra cascading render pass.
+  const [uiResetForBankId, setUiResetForBankId] = useState(effectiveBankId)
+  if (effectiveBankId !== uiResetForBankId) {
+    setUiResetForBankId(effectiveBankId)
     setEditingNickname(false)
     setActionsOpen(false)
-  }, [effectiveBankId])
+  }
 
   useEffect(() => {
     if (!actionsOpen) return
