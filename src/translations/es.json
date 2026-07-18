@@ -129,6 +129,8 @@
   "bankAccount.viewAllPayments": "Ver todos los pagos",
   "bankAccount.editNickname": "Editar apodo",
   "bankAccount.nicknameSaveError": "No se pudo guardar el apodo. Inténtalo de nuevo.",
+  "bankAccount.actions": "Acciones",
+  "bankAccount.downloadStatement": "Descargar estado de cuenta",
 
   "cases.title": "Información del caso",
   "cases.add": "Nuevo caso",
