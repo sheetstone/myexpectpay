@@ -131,6 +131,8 @@
   "bankAccount.nicknameSaveError": "Couldn't save nickname. Please try again.",
   "bankAccount.actions": "Actions",
   "bankAccount.downloadStatement": "Download Statement",
+  "bankAccount.verifyBannerTitle": "Verify this account",
+  "bankAccount.verifyBannerDesc": "Enter the two micro-deposit amounts sent to your account to complete verification.",
 
   "cases.title": "Case Info",
   "cases.add": "New Case",

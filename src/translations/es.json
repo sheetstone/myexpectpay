@@ -131,6 +131,8 @@
   "bankAccount.nicknameSaveError": "No se pudo guardar el apodo. Inténtalo de nuevo.",
   "bankAccount.actions": "Acciones",
   "bankAccount.downloadStatement": "Descargar estado de cuenta",
+  "bankAccount.verifyBannerTitle": "Verificar esta cuenta",
+  "bankAccount.verifyBannerDesc": "Ingrese los dos montos de micro-depósitos enviados a su cuenta para completar la verificación.",
 
   "cases.title": "Información del caso",
   "cases.add": "Nuevo caso",
