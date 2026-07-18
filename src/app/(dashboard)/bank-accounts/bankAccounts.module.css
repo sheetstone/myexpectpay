@@ -269,6 +269,22 @@
 
 .detailActions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  color: var(--color-text-primary);
+}
+.primaryBtn:hover { background: var(--color-bg); }
+.primaryBtn:disabled { opacity: 0.6; cursor: default; }
+
 .editBtn {
   padding: var(--space-2) var(--space-4);
   background: none;

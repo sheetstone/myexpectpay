@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import { PlusIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
+import { PlusIcon, PencilSquareIcon, StarIcon } from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -103,6 +103,15 @@ export function BankAccountsClient() {
       qc.invalidateQueries({ queryKey: ["banks"] })
       toast.toast(intl.formatMessage({ id: "bankAccount.verified" }), "success")
     },
+    onError: () => toast.toast(intl.formatMessage({ id: "common.error" }), "error"),
+  })
+
+  const setPrimaryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/banks/${id}/primary`, { method: "POST" })
+      if (!res.ok) throw new Error("Set primary failed")
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["banks"] }),
     onError: () => toast.toast(intl.formatMessage({ id: "common.error" }), "error"),
   })
 
@@ -273,12 +282,27 @@ export function BankAccountsClient() {
                       <PencilSquareIcon width={14} height={14} />
                     </button>
                   )}
+                  {selected.isPrimary && (
+                    <span className={`${styles.pill} ${styles.pillPrimary}`}>
+                      {t("bankAccount.primaryBadge")}
+                    </span>
+                  )}
                 </div>
                 <p className={styles.detailSub}>
                   {t("bankAccount.accountEndingIn", { last4: selected.accountNumberLast4 })}
                 </p>
               </div>
               <div className={styles.detailActions}>
+                {!selected.isPrimary && (
+                  <button
+                    className={styles.primaryBtn}
+                    onClick={() => setPrimaryMutation.mutate(selected.id)}
+                    disabled={setPrimaryMutation.isPending}
+                  >
+                    <StarIcon width={14} height={14} />
+                    {t("bankAccount.setPrimary")}
+                  </button>
+                )}
                 {!selected.verified && (
                   <button
                     className={styles.verifyBtn}
