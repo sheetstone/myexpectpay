@@ -157,7 +157,7 @@ describe("BankAccountsClient — required elements", () => {
 
   it("renders Edit button in detail panel", async () => {
     renderWithProviders(<BankAccountsClient />)
-    expect(await screen.findByRole("button", { name: /edit/i })).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: /^edit$/i })).toBeInTheDocument()
   })
 
   it("renders Delete button in detail panel", async () => {
@@ -234,5 +234,71 @@ describe("BankAccountsClient — required elements", () => {
     renderWithProviders(<BankAccountsClient />)
     await user.click(await screen.findByText("Wells Fargo"))
     expect(await screen.findByText(/no transactions yet for this account/i)).toBeInTheDocument()
+  })
+})
+
+describe("BankAccountsClient — inline nickname editing", () => {
+  it("shows an edit-nickname button next to the detail heading", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByRole("button", { name: /edit nickname/i })).toBeInTheDocument()
+  })
+
+  it("replaces the heading with an editable input when the edit button is clicked", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /edit nickname/i }))
+    const input = await screen.findByRole("textbox", { name: /edit nickname/i })
+    expect(input).toHaveValue("Chase Checking")
+    expect(screen.queryByRole("heading", { name: /chase checking/i })).not.toBeInTheDocument()
+  })
+
+  it("saves the new nickname on Enter", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /edit nickname/i }))
+    const input = await screen.findByRole("textbox", { name: /edit nickname/i })
+    await user.clear(input)
+    await user.type(input, "Everyday Spending{Enter}")
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/banks/b1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ nickname: "Everyday Spending" }),
+      }),
+    )
+  })
+
+  it("cancels the edit on Escape without saving", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /edit nickname/i }))
+    const input = await screen.findByRole("textbox", { name: /edit nickname/i })
+    await user.type(input, " changed")
+    await user.keyboard("{Escape}")
+
+    expect(await screen.findByRole("heading", { name: /chase checking/i })).toBeInTheDocument()
+    expect(global.fetch).not.toHaveBeenCalledWith(
+      "/api/banks/b1",
+      expect.objectContaining({ method: "PATCH" }),
+    )
+  })
+
+  it("saves the nickname on blur", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /edit nickname/i }))
+    const input = await screen.findByRole("textbox", { name: /edit nickname/i })
+    await user.clear(input)
+    await user.type(input, "Main Account")
+    await user.tab()
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/api/banks/b1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ nickname: "Main Account" }),
+      }),
+    )
   })
 })

@@ -228,6 +228,40 @@
   margin: 0 0 var(--space-1);
 }
 
+.nicknameRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.nicknameInput {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-heading);
+  font-family: inherit;
+  margin: 0 0 var(--space-1);
+  padding: 2px 6px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.nicknameEditBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  margin-bottom: var(--space-1);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nicknameEditBtn:hover { background: var(--color-bg); color: var(--color-text-primary); }
+
 .detailSub {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
