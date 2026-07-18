@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import { PlusIcon, PencilSquareIcon, StarIcon } from "@heroicons/react/24/outline"
+import {
+  PlusIcon, PencilSquareIcon, StarIcon, EllipsisVerticalIcon,
+  CheckIcon, ArrowDownTrayIcon, TrashIcon,
+} from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -61,6 +64,8 @@ export function BankAccountsClient() {
   const [editingNickname, setEditingNickname] = useState(false)
   const [nickDraft, setNickDraft] = useState("")
   const cancellingNicknameRef = useRef(false)
+  const [actionsOpen, setActionsOpen] = useState(false)
+  const actionsRef = useRef<HTMLDivElement>(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["banks"],
@@ -76,9 +81,26 @@ export function BankAccountsClient() {
     enabled: Boolean(effectiveBankId),
   })
 
-  useEffect(() => {
+  // Reset per-account UI state when the selected bank changes. Adjusted during
+  // render (rather than in a useEffect) per https://react.dev/learn/you-might-not-need-an-effect
+  // to avoid an extra cascading render pass.
+  const [uiResetForBankId, setUiResetForBankId] = useState(effectiveBankId)
+  if (effectiveBankId !== uiResetForBankId) {
+    setUiResetForBankId(effectiveBankId)
     setEditingNickname(false)
-  }, [effectiveBankId])
+    setActionsOpen(false)
+  }
+
+  useEffect(() => {
+    if (!actionsOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
+        setActionsOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [actionsOpen])
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -303,21 +325,55 @@ export function BankAccountsClient() {
                     {t("bankAccount.setPrimary")}
                   </button>
                 )}
-                {!selected.verified && (
+                <div className={styles.actionsMenuWrap} ref={actionsRef}>
                   <button
-                    className={styles.verifyBtn}
-                    onClick={() => verifyMutation.mutate(selected.id)}
-                    disabled={verifyMutation.isPending}
+                    className={styles.actionsBtn}
+                    onClick={() => setActionsOpen((open) => !open)}
+                    aria-haspopup="menu"
+                    aria-expanded={actionsOpen}
                   >
-                    {t("bankAccount.verify")}
+                    <EllipsisVerticalIcon width={16} height={16} />
+                    {t("bankAccount.actions")}
                   </button>
-                )}
-                <button className={styles.editBtn} onClick={() => setEditAccount(selected)}>
-                  {t("common.edit")}
-                </button>
-                <button className={styles.deleteBtn} onClick={() => setDeleteTarget(selected)}>
-                  {t("common.delete")}
-                </button>
+                  {actionsOpen && (
+                    <div className={styles.actionsMenu} role="menu">
+                      <button
+                        className={styles.actionsMenuItem}
+                        role="menuitem"
+                        onClick={() => { setActionsOpen(false); setEditAccount(selected) }}
+                      >
+                        <PencilSquareIcon width={16} height={16} />
+                        {t("common.edit")}
+                      </button>
+                      {!selected.verified && (
+                        <button
+                          className={styles.actionsMenuItem}
+                          role="menuitem"
+                          onClick={() => { setActionsOpen(false); verifyMutation.mutate(selected.id) }}
+                        >
+                          <CheckIcon width={16} height={16} />
+                          {t("bankAccount.verify")}
+                        </button>
+                      )}
+                      <button
+                        className={styles.actionsMenuItem}
+                        role="menuitem"
+                        onClick={() => setActionsOpen(false)}
+                      >
+                        <ArrowDownTrayIcon width={16} height={16} />
+                        {t("bankAccount.downloadStatement")}
+                      </button>
+                      <button
+                        className={`${styles.actionsMenuItem} ${styles.actionsMenuItemDanger}`}
+                        role="menuitem"
+                        onClick={() => { setActionsOpen(false); setDeleteTarget(selected) }}
+                      >
+                        <TrashIcon width={16} height={16} />
+                        {t("common.delete")}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

@@ -155,14 +155,18 @@ describe("BankAccountsClient — required elements", () => {
     expect(await screen.findByRole("heading", { name: /chase checking/i })).toBeInTheDocument()
   })
 
-  it("renders Edit button in detail panel", async () => {
+  it("renders Edit as a menu item inside the Actions dropdown", async () => {
+    const user = userEvent.setup()
     renderWithProviders(<BankAccountsClient />)
-    expect(await screen.findByRole("button", { name: /^edit$/i })).toBeInTheDocument()
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(await screen.findByRole("menuitem", { name: /^edit$/i })).toBeInTheDocument()
   })
 
-  it("renders Delete button in detail panel", async () => {
+  it("renders Delete as a menu item inside the Actions dropdown", async () => {
+    const user = userEvent.setup()
     renderWithProviders(<BankAccountsClient />)
-    expect(await screen.findByRole("button", { name: /delete/i })).toBeInTheDocument()
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(await screen.findByRole("menuitem", { name: /delete/i })).toBeInTheDocument()
   })
 
   it("renders Routing Rules section with toggles", async () => {
@@ -324,5 +328,56 @@ describe("BankAccountsClient — set as primary", () => {
     await user.click(await screen.findByRole("button", { name: /set as primary/i }))
 
     expect(global.fetch).toHaveBeenCalledWith("/api/banks/b2/primary", { method: "POST" })
+  })
+})
+
+describe("BankAccountsClient — Actions dropdown menu", () => {
+  it("does not show the menu until the Actions button is clicked", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    await screen.findByRole("button", { name: /^actions$/i })
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument()
+  })
+
+  it("opens the menu with Edit, Download Statement, and Delete items", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(await screen.findByRole("menu")).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: /^edit$/i })).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: /download statement/i })).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: /delete/i })).toBeInTheDocument()
+  })
+
+  it("includes a Verify menu item only for an unverified account", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(await screen.findByRole("menuitem", { name: /verify/i })).toBeInTheDocument()
+  })
+
+  it("omits the Verify menu item for an already-verified account", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(screen.queryByRole("menuitem", { name: /^verify$/i })).not.toBeInTheDocument()
+  })
+
+  it("opens the Edit modal and closes the menu when Edit is clicked", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    await user.click(await screen.findByRole("menuitem", { name: /^edit$/i }))
+    expect(await screen.findByRole("dialog", { name: /edit account/i })).toBeInTheDocument()
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument()
+  })
+
+  it("closes the menu when clicking outside of it", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByRole("button", { name: /^actions$/i }))
+    expect(await screen.findByRole("menu")).toBeInTheDocument()
+    await user.click(await screen.findByRole("heading", { name: /bank accounts/i }))
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument()
   })
 })

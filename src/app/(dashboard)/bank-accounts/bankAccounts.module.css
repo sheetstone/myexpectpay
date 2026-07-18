@@ -285,29 +285,55 @@
 .primaryBtn:hover { background: var(--color-bg); }
 .primaryBtn:disabled { opacity: 0.6; cursor: default; }
 
-.editBtn {
+.actionsMenuWrap { position: relative; }
+
+.actionsBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
   padding: var(--space-2) var(--space-4);
-  background: none;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.actionsBtn:hover { background: var(--color-primary-dark); }
+
+.actionsMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: background 0.15s;
-  color: var(--color-text-primary);
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  z-index: 20;
+  overflow: hidden;
 }
-.editBtn:hover { background: var(--color-bg); }
 
-.deleteBtn {
-  padding: var(--space-2) var(--space-4);
+.actionsMenuItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
   background: none;
-  border: 1px solid var(--color-danger);
-  border-radius: var(--radius-md);
+  border: none;
+  border-bottom: 1px dashed var(--color-border);
   font-size: var(--text-sm);
-  color: var(--color-danger);
+  color: var(--color-text-primary);
+  text-align: left;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.deleteBtn:hover { background: #fef2f2; }
+.actionsMenuItem:last-child { border-bottom: none; }
+.actionsMenuItem:hover { background: var(--color-primary-light); color: var(--color-primary-dark); }
+.actionsMenuItemDanger { color: var(--color-danger); }
+.actionsMenuItemDanger:hover { background: #fef2f2; color: var(--color-danger); }
 
 .verifyBtn {
   padding: var(--space-2) var(--space-4);
