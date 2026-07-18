@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
 import {
   PlusIcon, PencilSquareIcon, StarIcon, EllipsisVerticalIcon,
-  CheckIcon, ArrowDownTrayIcon, TrashIcon,
+  CheckIcon, ArrowDownTrayIcon, TrashIcon, ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -81,10 +81,15 @@ export function BankAccountsClient() {
     enabled: Boolean(effectiveBankId),
   })
 
-  useEffect(() => {
+  // Reset per-account UI state when the selected bank changes. Adjusted during
+  // render (rather than in a useEffect) per https://react.dev/learn/you-might-not-need-an-effect
+  // to avoid an extra cascading render pass.
+  const [uiResetForBankId, setUiResetForBankId] = useState(effectiveBankId)
+  if (effectiveBankId !== uiResetForBankId) {
+    setUiResetForBankId(effectiveBankId)
     setEditingNickname(false)
     setActionsOpen(false)
-  }, [effectiveBankId])
+  }
 
   useEffect(() => {
     if (!actionsOpen) return
@@ -371,6 +376,26 @@ export function BankAccountsClient() {
                 </div>
               </div>
             </div>
+
+            {/* Verify banner */}
+            {!selected.verified && (
+              <div className={styles.verifyBanner}>
+                <div className={styles.verifyBannerIcon}>
+                  <ExclamationTriangleIcon width={16} height={16} />
+                </div>
+                <div className={styles.verifyBannerText}>
+                  <div className={styles.verifyBannerTitle}>{t("bankAccount.verifyBannerTitle")}</div>
+                  <div className={styles.verifyBannerDesc}>{t("bankAccount.verifyBannerDesc")}</div>
+                </div>
+                <button
+                  className={styles.verifyBtn}
+                  onClick={() => verifyMutation.mutate(selected.id)}
+                  disabled={verifyMutation.isPending}
+                >
+                  {t("bankAccount.verify")}
+                </button>
+              </div>
+            )}
 
             {/* Stats row */}
             {detail && detail.id === selected.id && (

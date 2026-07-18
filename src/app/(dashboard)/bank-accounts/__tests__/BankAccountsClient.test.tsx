@@ -381,3 +381,28 @@ describe("BankAccountsClient — Actions dropdown menu", () => {
     expect(screen.queryByRole("menu")).not.toBeInTheDocument()
   })
 })
+
+describe("BankAccountsClient — verification banner", () => {
+  it("does not show a verify banner for an already-verified account", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    await screen.findByRole("heading", { name: /chase checking/i })
+    expect(screen.queryByText(/verify this account/i)).not.toBeInTheDocument()
+  })
+
+  it("shows a verify banner with title, description, and a Verify button for an unverified account", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    expect(await screen.findByText(/verify this account/i)).toBeInTheDocument()
+    expect(screen.getByText(/micro-deposit amounts/i)).toBeInTheDocument()
+  })
+
+  it("calls the verify endpoint when the banner's Verify button is clicked", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    await user.click(await screen.findByRole("button", { name: /^verify$/i }))
+
+    expect(global.fetch).toHaveBeenCalledWith("/api/banks/b2/verify", { method: "POST" })
+  })
+})
