@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useIntl } from "react-intl"
@@ -7,6 +8,8 @@ import type { BankAccount } from "@/types"
 import { createBankSchema, updateBankSchema } from "@/lib/schemas/bankSchema"
 import type { z } from "zod"
 import { Spinner } from "@/components/ui"
+import { validateRouting } from "@/utils/validateRouting"
+import { ROUTING_LOOKUP_DEBOUNCE_MS } from "@/constants"
 import fs from "@/components/shared/formStyles.module.css"
 
 type CreateValues = z.infer<typeof createBankSchema>
@@ -45,6 +48,23 @@ export function BankAccountForm({ account, onSuccess, onCancel }: BankAccountFor
   const form = isEdit ? updateForm : createForm
   const { formState: { isSubmitting, errors } } = form
 
+  const lookupDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleRoutingBlur(routing: string) {
+    if (!validateRouting(routing)) return
+    if (lookupDebounceRef.current) clearTimeout(lookupDebounceRef.current)
+    lookupDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/banks/lookup/${routing}`)
+        if (!res.ok) throw new Error("Lookup failed")
+        const result: { bankName: string } = await res.json()
+        createForm.setValue("bankName", result.bankName, { shouldValidate: true })
+      } catch {
+        createForm.setValue("bankName", "", { shouldValidate: false })
+      }
+    }, ROUTING_LOOKUP_DEBOUNCE_MS)
+  }
+
   async function onSubmit(values: CreateValues | UpdateValues) {
     const url = account ? `/api/banks/${account.id}` : "/api/banks"
     const method = account ? "PATCH" : "POST"
@@ -73,23 +93,10 @@ export function BankAccountForm({ account, onSuccess, onCancel }: BankAccountFor
         <>
           <div className={fs.field}>
             <label className={fs.label}>
-              {t("bankAccount.bankName")}
-              <input
-                {...(createForm.register("bankName"))}
-                className={`${fs.input} ${createForm.formState.errors.bankName ? fs.inputError : ""}`}
-                autoComplete="organization"
-              />
-            </label>
-            {createForm.formState.errors.bankName && (
-              <p className={fs.fieldError}>{createForm.formState.errors.bankName.message}</p>
-            )}
-          </div>
-
-          <div className={fs.field}>
-            <label className={fs.label}>
               {t("bankAccount.routingNumber")}
               <input
                 {...createForm.register("routingNumber")}
+                onBlur={(e) => handleRoutingBlur(e.target.value)}
                 className={`${fs.input} ${createForm.formState.errors.routingNumber ? fs.inputError : ""}`}
                 inputMode="numeric"
                 maxLength={9}
@@ -97,6 +104,20 @@ export function BankAccountForm({ account, onSuccess, onCancel }: BankAccountFor
             </label>
             {createForm.formState.errors.routingNumber && (
               <p className={fs.fieldError}>{createForm.formState.errors.routingNumber.message ?? t("bankAccount.invalidRouting")}</p>
+            )}
+          </div>
+
+          <div className={fs.field}>
+            <label className={fs.label}>
+              {t("bankAccount.bankName")}
+              <input
+                {...(createForm.register("bankName"))}
+                readOnly
+                className={`${fs.input} ${fs.readOnly} ${createForm.formState.errors.bankName ? fs.inputError : ""}`}
+              />
+            </label>
+            {createForm.formState.errors.bankName && (
+              <p className={fs.fieldError}>{createForm.formState.errors.bankName.message}</p>
             )}
           </div>
 
