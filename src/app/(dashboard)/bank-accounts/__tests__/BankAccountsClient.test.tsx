@@ -45,22 +45,34 @@ const mockTrend = [
   { month: "2025-06", sent: 200, received: 1000 },
 ]
 
+const mockRecentPayments = [
+  { id: "p1", amount: 250, caseNumber: "AB-12345", recipientName: "Jane Employee", paymentDate: "2025-06-15", status: "completed", type: "sent" },
+  { id: "p2", amount: 500, caseNumber: "CD-67890", recipientName: "John Recipient", paymentDate: "2025-06-10", status: "completed", type: "received" },
+]
+
 const mockBankDetails: Record<string, unknown> = {
   b1: {
     ...mockBanks.items[0],
     stats: { totalReceived: 1200, totalSent: 300, linkedCases: 2, lastActivity: "2025-06-15" },
     trend: mockTrend,
+    recentPayments: mockRecentPayments,
   },
   b2: {
     ...mockBanks.items[1],
     stats: { totalReceived: 0, totalSent: 0, linkedCases: 0, lastActivity: null },
     trend: mockTrend,
+    recentPayments: [],
   },
 }
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
   usePathname: () => "/bank-accounts",
+}))
+vi.mock("next/link", () => ({
+  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  ),
 }))
 vi.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -180,7 +192,10 @@ describe("BankAccountsClient — required elements", () => {
     // existing Routing Rules info item, so this stat cell isn't the only match.
     const receiveOnlyEls = await screen.findAllByText(/receive only/i)
     expect(receiveOnlyEls.length).toBeGreaterThanOrEqual(1)
-    expect(await screen.findByText(/jun 15, 2025/i)).toBeInTheDocument()
+    // "Jun 15, 2025" also appears in the Recent Transactions table (same date used in
+    // the mock payment), so this isn't the only match.
+    const lastActivityEls = await screen.findAllByText(/jun 15, 2025/i)
+    expect(lastActivityEls.length).toBeGreaterThanOrEqual(1)
   })
 
   it("shows No recent activity when a bank has no payment history", async () => {
@@ -195,5 +210,29 @@ describe("BankAccountsClient — required elements", () => {
     expect(await screen.findByText(/payment trend/i)).toBeInTheDocument()
     expect(await screen.findByText(/12 months/i)).toBeInTheDocument()
     expect(await screen.findByTestId("trend-chart")).toBeInTheDocument()
+  })
+
+  it("renders Recent Transactions table with rows for the selected account", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText(/recent transactions/i)).toBeInTheDocument()
+    expect(await screen.findByText("AB-12345")).toBeInTheDocument()
+    expect(await screen.findByText("CD-67890")).toBeInTheDocument()
+    expect(await screen.findByText(/^sent$/i)).toBeInTheDocument()
+    expect(await screen.findByText(/^received$/i)).toBeInTheDocument()
+    expect(await screen.findByText("−$250.00")).toBeInTheDocument()
+    expect(await screen.findByText("+$500.00")).toBeInTheDocument()
+  })
+
+  it("renders a View all payments link in the transactions section", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    const link = await screen.findByRole("link", { name: /view all payments/i })
+    expect(link).toHaveAttribute("href", "/payments")
+  })
+
+  it("shows a no-transactions message when a bank has no payment history", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    expect(await screen.findByText(/no transactions yet for this account/i)).toBeInTheDocument()
   })
 })
