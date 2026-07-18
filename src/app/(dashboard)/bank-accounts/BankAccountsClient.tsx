@@ -11,15 +11,18 @@ import {
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
-import { Modal, ConfirmDialog, Spinner, useToast } from "@/components/ui"
+import { Modal, ConfirmDialog, Spinner, Pagination, useToast } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
 import { formatMoney } from "@/utils/formatMoney"
 import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
+import { PAGE_SIZE } from "@/constants"
 import { BankAccountForm } from "./BankAccountForm"
 import styles from "./bankAccounts.module.css"
 
-async function fetchBanks(): Promise<PaginatedResult<BankAccount>> {
-  const res = await fetch("/api/banks")
+async function fetchBanks(cursor?: string | null): Promise<PaginatedResult<BankAccount>> {
+  const params = new URLSearchParams({ limit: String(PAGE_SIZE) })
+  if (cursor) params.set("cursor", cursor)
+  const res = await fetch(`/api/banks?${params}`)
   if (!res.ok) throw new Error("Failed to load bank accounts")
   return res.json()
 }
@@ -66,12 +69,31 @@ export function BankAccountsClient() {
   const cancellingNicknameRef = useRef(false)
   const [actionsOpen, setActionsOpen] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
+  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
+  const [pageIdx, setPageIdx] = useState(0)
+  const cursor = cursorStack[pageIdx]
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["banks"],
-    queryFn: fetchBanks,
+    queryKey: ["banks", cursor],
+    queryFn: () => fetchBanks(cursor),
     staleTime: 60_000,
   })
+
+  const hasMore = data?.hasMore ?? false
+  const nextCursor = data?.nextCursor ?? null
+  const page = pageIdx + 1
+  const totalPages = hasMore ? pageIdx + 2 : pageIdx + 1
+
+  function handlePageChange(newPage: number) {
+    if (newPage > page && hasMore) {
+      const newStack = [...cursorStack.slice(0, pageIdx + 1), nextCursor]
+      setCursorStack(newStack)
+      setPageIdx(newPage - 1)
+    } else if (newPage < page) {
+      setPageIdx(newPage - 1)
+    }
+    setSelectedId(null)
+  }
 
   const effectiveBankId = selectedId ?? data?.items[0]?.id ?? null
 
@@ -264,6 +286,11 @@ export function BankAccountsClient() {
                   )
                 })}
               </ul>
+            )}
+            {totalPages > 1 && (
+              <div className={styles.sidebarPagination}>
+                <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
+              </div>
             )}
           </div>
           <button className={styles.addBtnSidebar} onClick={() => setShowAddModal(true)}>
