@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import { PlusIcon } from "@heroicons/react/24/outline"
+import { PlusIcon, PencilSquareIcon } from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -58,6 +58,9 @@ export function BankAccountsClient() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [editAccount, setEditAccount] = useState<BankAccount | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<BankAccount | null>(null)
+  const [editingNickname, setEditingNickname] = useState(false)
+  const [nickDraft, setNickDraft] = useState("")
+  const cancellingNicknameRef = useRef(false)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["banks"],
@@ -72,6 +75,10 @@ export function BankAccountsClient() {
     queryFn: () => fetchBankDetail(effectiveBankId!),
     enabled: Boolean(effectiveBankId),
   })
+
+  useEffect(() => {
+    setEditingNickname(false)
+  }, [effectiveBankId])
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -112,10 +119,55 @@ export function BankAccountsClient() {
     onError: () => toast.toast(intl.formatMessage({ id: "common.error" }), "error"),
   })
 
+  const nicknameMutation = useMutation({
+    mutationFn: async ({ id, nickname }: { id: string; nickname: string | null }) => {
+      const res = await fetch(`/api/banks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname }),
+      })
+      if (!res.ok) throw new Error("Update failed")
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["banks"] })
+      setEditingNickname(false)
+    },
+    onError: () => toast.toast(intl.formatMessage({ id: "bankAccount.nicknameSaveError" }), "error"),
+  })
+
   const t = (id: string, values?: Record<string, string | number>) => intl.formatMessage({ id }, values)
 
   const accounts = data?.items ?? []
   const selected = accounts.find((a) => a.id === selectedId) ?? accounts[0] ?? null
+
+  function startEditNickname() {
+    if (!selected) return
+    setNickDraft(selected.nickname ?? "")
+    setEditingNickname(true)
+  }
+
+  function saveNickname() {
+    if (!selected || nicknameMutation.isPending) return
+    nicknameMutation.mutate({ id: selected.id, nickname: nickDraft.trim() || null })
+  }
+
+  function handleNicknameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      saveNickname()
+    } else if (e.key === "Escape") {
+      cancellingNicknameRef.current = true
+      setEditingNickname(false)
+    }
+  }
+
+  function handleNicknameBlur() {
+    if (cancellingNicknameRef.current) {
+      cancellingNicknameRef.current = false
+      return
+    }
+    saveNickname()
+  }
 
   if (isLoading) {
     return (
@@ -194,7 +246,34 @@ export function BankAccountsClient() {
           <div className={styles.detail}>
             <div className={styles.detailHead}>
               <div>
-                <h2 className={styles.detailTitle}>{selected.nickname ?? selected.bankName}</h2>
+                <div className={styles.nicknameRow}>
+                  {editingNickname ? (
+                    <input
+                      className={styles.nicknameInput}
+                      value={nickDraft}
+                      onChange={(e) => setNickDraft(e.target.value)}
+                      onKeyDown={handleNicknameKeyDown}
+                      onBlur={handleNicknameBlur}
+                      autoFocus
+                      disabled={nicknameMutation.isPending}
+                      maxLength={60}
+                      aria-label={t("bankAccount.editNickname")}
+                    />
+                  ) : (
+                    <h2 className={styles.detailTitle}>{selected.nickname ?? selected.bankName}</h2>
+                  )}
+                  {!editingNickname && (
+                    <button
+                      type="button"
+                      className={styles.nicknameEditBtn}
+                      onClick={startEditNickname}
+                      aria-label={t("bankAccount.editNickname")}
+                      title={t("bankAccount.editNickname")}
+                    >
+                      <PencilSquareIcon width={14} height={14} />
+                    </button>
+                  )}
+                </div>
                 <p className={styles.detailSub}>
                   {t("bankAccount.accountEndingIn", { last4: selected.accountNumberLast4 })}
                 </p>

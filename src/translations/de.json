@@ -127,6 +127,8 @@
   "bankAccount.recentTransactions": "Letzte Transaktionen",
   "bankAccount.noTransactions": "Noch keine Transaktionen für dieses Konto.",
   "bankAccount.viewAllPayments": "Alle Zahlungen anzeigen",
+  "bankAccount.editNickname": "Spitznamen bearbeiten",
+  "bankAccount.nicknameSaveError": "Spitzname konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
 
   "cases.title": "Fallinfo",
   "cases.add": "Neuer Fall",

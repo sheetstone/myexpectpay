@@ -127,6 +127,8 @@
   "bankAccount.recentTransactions": "Transacciones recientes",
   "bankAccount.noTransactions": "Aún no hay transacciones para esta cuenta.",
   "bankAccount.viewAllPayments": "Ver todos los pagos",
+  "bankAccount.editNickname": "Editar apodo",
+  "bankAccount.nicknameSaveError": "No se pudo guardar el apodo. Inténtalo de nuevo.",
 
   "cases.title": "Información del caso",
   "cases.add": "Nuevo caso",

@@ -127,6 +127,8 @@
   "bankAccount.recentTransactions": "Recent Transactions",
   "bankAccount.noTransactions": "No transactions yet for this account.",
   "bankAccount.viewAllPayments": "View all payments",
+  "bankAccount.editNickname": "Edit nickname",
+  "bankAccount.nicknameSaveError": "Couldn't save nickname. Please try again.",
 
   "cases.title": "Case Info",
   "cases.add": "New Case",
