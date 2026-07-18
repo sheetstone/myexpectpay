@@ -15,12 +15,12 @@ import { Modal, ConfirmDialog, Spinner, Pagination, useToast } from "@/component
 import { formatDate } from "@/utils/formatDate"
 import { formatMoney } from "@/utils/formatMoney"
 import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
-import { PAGE_SIZE } from "@/constants"
+import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
 import { BankAccountForm } from "./BankAccountForm"
 import styles from "./bankAccounts.module.css"
 
 async function fetchBanks(cursor?: string | null): Promise<PaginatedResult<BankAccount>> {
-  const params = new URLSearchParams({ limit: String(PAGE_SIZE) })
+  const params = new URLSearchParams({ limit: String(BANK_ACCOUNTS_PAGE_SIZE) })
   if (cursor) params.set("cursor", cursor)
   const res = await fetch(`/api/banks?${params}`)
   if (!res.ok) throw new Error("Failed to load bank accounts")
