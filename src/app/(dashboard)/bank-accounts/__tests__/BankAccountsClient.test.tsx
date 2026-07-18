@@ -302,3 +302,27 @@ describe("BankAccountsClient — inline nickname editing", () => {
     )
   })
 })
+
+describe("BankAccountsClient — set as primary", () => {
+  it("shows a Primary badge instead of a Set as Primary button for the primary account", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    expect(await screen.findByText(/★ primary/i)).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /set as primary/i })).not.toBeInTheDocument()
+  })
+
+  it("shows a Set as Primary button for a non-primary selected account", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    expect(await screen.findByRole("button", { name: /set as primary/i })).toBeInTheDocument()
+  })
+
+  it("calls the primary endpoint when Set as Primary is clicked", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await user.click(await screen.findByText("Wells Fargo"))
+    await user.click(await screen.findByRole("button", { name: /set as primary/i }))
+
+    expect(global.fetch).toHaveBeenCalledWith("/api/banks/b2/primary", { method: "POST" })
+  })
+})
