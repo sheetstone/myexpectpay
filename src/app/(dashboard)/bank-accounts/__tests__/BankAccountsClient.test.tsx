@@ -104,7 +104,7 @@ vi.mock("@/components/ui", async (importOriginal) => {
 
 beforeEach(() => {
   global.fetch = vi.fn().mockImplementation((url: string) => {
-    if (url === "/api/banks") {
+    if (url.startsWith("/api/banks?")) {
       return Promise.resolve({ ok: true, json: async () => mockBanks })
     }
     const match = /\/api\/banks\/(\w+)$/.exec(url)
@@ -379,6 +379,72 @@ describe("BankAccountsClient — Actions dropdown menu", () => {
     expect(await screen.findByRole("menu")).toBeInTheDocument()
     await user.click(await screen.findByRole("heading", { name: /bank accounts/i }))
     expect(screen.queryByRole("menu")).not.toBeInTheDocument()
+  })
+})
+
+describe("BankAccountsClient — sidebar pagination", () => {
+  const page1 = { items: mockBanks.items, total: 3, hasMore: true, nextCursor: "b2" }
+  const b3 = {
+    id: "b3",
+    bankName: "US Bank",
+    nickname: null,
+    accountType: "checking",
+    accountNumberLast4: "1122",
+    routingNumber: "091000019",
+    verified: true,
+    isPrimary: false,
+    receivePayments: true,
+    sendPayments: true,
+    createdAt: "2025-03-01",
+    updatedAt: "2025-03-01",
+  }
+  const page2 = { items: [b3], total: 3, hasMore: false, nextCursor: null }
+  const b3Detail = { ...b3, stats: { totalReceived: 0, totalSent: 0, linkedCases: 0, lastActivity: null }, trend: mockTrend, recentPayments: [] }
+
+  beforeEach(() => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("cursor=b2")) {
+        return Promise.resolve({ ok: true, json: async () => page2 })
+      }
+      if (url.startsWith("/api/banks?")) {
+        return Promise.resolve({ ok: true, json: async () => page1 })
+      }
+      if (url === "/api/banks/b3") {
+        return Promise.resolve({ ok: true, json: async () => b3Detail })
+      }
+      const match = /\/api\/banks\/(\w+)$/.exec(url)
+      if (match) {
+        return Promise.resolve({ ok: true, json: async () => mockBankDetails[match[1]!] })
+      }
+      return Promise.resolve({ ok: false })
+    })
+  })
+
+  it("shows pagination controls in the sidebar when there is a next page", async () => {
+    renderWithProviders(<BankAccountsClient />)
+    await screen.findByRole("heading", { name: /chase checking/i })
+    expect(await screen.findByRole("button", { name: /next page/i })).toBeInTheDocument()
+  })
+
+  it("loads the next page of accounts when Next is clicked", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await screen.findByRole("heading", { name: /chase checking/i })
+    await user.click(await screen.findByRole("button", { name: /next page/i }))
+
+    expect((await screen.findAllByText("US Bank")).length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByText("Chase Checking")).not.toBeInTheDocument()
+  })
+
+  it("disables the Previous button on the first page and Next on the last page", async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<BankAccountsClient />)
+    await screen.findByRole("heading", { name: /chase checking/i })
+    expect(await screen.findByRole("button", { name: /previous page/i })).toBeDisabled()
+
+    await user.click(await screen.findByRole("button", { name: /next page/i }))
+    await screen.findAllByText("US Bank")
+    expect(await screen.findByRole("button", { name: /next page/i })).toBeDisabled()
   })
 })
 
