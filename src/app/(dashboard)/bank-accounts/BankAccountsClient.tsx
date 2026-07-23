@@ -20,6 +20,7 @@ import { BankDetailHeader } from "./components/BankDetailHeader"
 import { VerifyBanner } from "./components/VerifyBanner"
 import { BankStatsRow } from "./components/BankStatsRow"
 import { BankInfoGrid } from "./components/BankInfoGrid"
+import { RoutingRulesSection } from "./components/RoutingRulesSection"
 import { formatActivityDate } from "./formatActivityDate"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
@@ -266,41 +267,11 @@ export function BankAccountsClient() {
             <BankInfoGrid bank={selected} />
 
             {/* Routing toggles */}
-            <div className={styles.section}>
-              <p className={styles.sectionTitle}>{t("bankAccount.routingRules")}</p>
-              <div className={styles.toggleRow}>
-                <span className={styles.toggleLabel}>
-                  <span className={styles.toggleLabelMain}>{t("bankAccount.receivePayments")}</span>
-                  <span className={styles.toggleLabelSub}>{t("bankAccount.receivePaymentsDesc")}</span>
-                </span>
-                <label className={styles.toggle}>
-                  <input
-                    type="checkbox"
-                    checked={selected.receivePayments}
-                    onChange={(e) =>
-                      toggleMutation.mutate({ id: selected.id, field: "receivePayments", value: e.target.checked })
-                    }
-                  />
-                  <span className={styles.toggleSlider} />
-                </label>
-              </div>
-              <div className={styles.toggleRow}>
-                <span className={styles.toggleLabel}>
-                  <span className={styles.toggleLabelMain}>{t("bankAccount.sendPayments")}</span>
-                  <span className={styles.toggleLabelSub}>{t("bankAccount.sendPaymentsDesc")}</span>
-                </span>
-                <label className={styles.toggle}>
-                  <input
-                    type="checkbox"
-                    checked={selected.sendPayments}
-                    onChange={(e) =>
-                      toggleMutation.mutate({ id: selected.id, field: "sendPayments", value: e.target.checked })
-                    }
-                  />
-                  <span className={styles.toggleSlider} />
-                </label>
-              </div>
-            </div>
+            <RoutingRulesSection
+              receivePayments={selected.receivePayments}
+              sendPayments={selected.sendPayments}
+              onToggle={(field, value) => toggleMutation.mutate({ id: selected.id, field, value })}
+            />
 
             {/* Trend chart */}
             {detail && detail.id === selected.id && (
