@@ -19,7 +19,7 @@ import { BankSidebar } from "./components/BankSidebar"
 import { BankDetailHeader } from "./components/BankDetailHeader"
 import { VerifyBanner } from "./components/VerifyBanner"
 import { BankStatsRow } from "./components/BankStatsRow"
-import { RoutingTag } from "./components/RoutingTag"
+import { BankInfoGrid } from "./components/BankInfoGrid"
 import { formatActivityDate } from "./formatActivityDate"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
@@ -263,34 +263,7 @@ export function BankAccountsClient() {
             )}
 
             {/* Info grid */}
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>{t("bankAccount.bankName")}</span>
-                <span className={styles.infoValue}>{selected.bankName}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>{t("bankAccount.accountType")}</span>
-                <span className={styles.infoValue}>{t(`bankAccount.${selected.accountType}`)}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>{t("bankAccount.routingNumber")}</span>
-                <span className={styles.infoValue}>{selected.routingNumber}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>{t("bankAccount.accountNumber")}</span>
-                <span className={styles.infoValue}>&bull;&bull;&bull;&bull; {selected.accountNumberLast4}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Status</span>
-                <span className={`${styles.badge} ${selected.verified ? styles.badgeVerified : styles.badgeUnverified}`}>
-                  {selected.verified ? t("bankAccount.verified") : t("bankAccount.unverified")}
-                </span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>{t("bankAccount.routingRules")}</span>
-                <RoutingTag receive={selected.receivePayments} send={selected.sendPayments} />
-              </div>
-            </div>
+            <BankInfoGrid bank={selected} />
 
             {/* Routing toggles */}
             <div className={styles.section}>
