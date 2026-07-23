@@ -13,17 +13,20 @@
   flex-wrap: wrap;
 }
 
+/* Container only — deliberately no nested `.pageHead h1` rule here. Some
+   pages nest their h1 inside their own wrapper (e.g. bank-accounts'
+   `.headText`), which would give a same-specificity, cascade-order-dependent
+   clash with a shared descendant selector. Each page keeps its own h1
+   typography rule locally instead. */
 .pageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
   padding-bottom: var(--space-4);
   border-bottom: 2px solid rgba(47, 168, 152, 0.18);
   margin-bottom: var(--space-6);
-}
-
-.pageHead h1 {
-  font-size: 26px;
-  font-weight: var(--weight-light);
-  color: var(--color-text-heading);
-  margin: 0 0 var(--space-1);
+  flex-wrap: wrap;
 }
 
 .sub {
@@ -58,5 +61,5 @@
 .centred {
   display: flex;
   justify-content: center;
-  padding: var(--space-12) 0;
+  padding: var(--space-8) 0;
 }
