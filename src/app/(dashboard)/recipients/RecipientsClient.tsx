@@ -9,6 +9,7 @@ import type { Recipient, Case, PaginatedResult } from "@/types"
 import { PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { RecipientForm } from "./RecipientForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./recipients.module.css"
 
 async function fetchRecipients(cursor?: string | null): Promise<PaginatedResult<Recipient>> {
@@ -79,16 +80,16 @@ export function RecipientsClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
-        <h1>{t("recipients.title")}</h1>
-        <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>
+      <div className={shell.pageHead}>
+        <h1 className={styles.pageTitle}>{t("recipients.title")}</h1>
+        <button className={shell.addBtn} onClick={() => setShowAddModal(true)}>
           <PlusIcon width={16} height={16} />
           {t("recipients.add")}
         </button>
       </div>
 
       {isLoading ? (
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       ) : isError ? (
         <p>{t("common.error")}</p>
       ) : recipients.length === 0 ? (
