@@ -4,16 +4,7 @@
   padding: var(--space-8) var(--space-6);
 }
 
-.pageHead {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding-bottom: var(--space-4);
-  border-bottom: 2px solid rgba(47,168,152,0.18);
-  margin-bottom: var(--space-6);
-}
-
-.pageHead h1 {
+.pageTitle {
   font-size: 26px;
   font-weight: var(--weight-light);
   color: var(--color-text-heading);
@@ -180,8 +171,3 @@
   font-size: var(--text-sm);
 }
 
-.centred {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-8) 0;
-}

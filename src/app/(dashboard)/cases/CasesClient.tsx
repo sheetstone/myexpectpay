@@ -7,7 +7,9 @@ import { PlusIcon, PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outli
 import { Modal, ConfirmDialog, Spinner, Pagination, useToast } from "@/components/ui"
 import type { Case, PaginatedResult } from "@/types"
 import { PAGE_SIZE } from "@/constants"
+import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { CaseForm } from "./CaseForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./cases.module.css"
 
 async function fetchCases(cursor?: string | null): Promise<PaginatedResult<Case>> {
@@ -22,13 +24,10 @@ export function CasesClient() {
   const intl = useIntl()
   const qc = useQueryClient()
   const { toast } = useToast()
-  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
-  const [pageIdx, setPageIdx] = useState(0)
+  const { cursor, page, handlePageChange: handlePageChangeRaw } = useCursorPagination()
   const [showAddModal, setShowAddModal] = useState(false)
   const [editCase, setEditCase] = useState<Case | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<Case | null>(null)
-
-  const cursor = cursorStack[pageIdx]
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["cases", cursor],
@@ -54,31 +53,24 @@ export function CasesClient() {
   const cases = data?.items ?? []
   const hasMore = data?.hasMore ?? false
   const nextCursor = data?.nextCursor ?? null
-  const page = pageIdx + 1
-  const totalPages = hasMore ? pageIdx + 2 : pageIdx + 1
+  const totalPages = hasMore ? page + 1 : page
 
   function handlePageChange(newPage: number) {
-    if (newPage > page && hasMore) {
-      const newStack = [...cursorStack.slice(0, pageIdx + 1), nextCursor]
-      setCursorStack(newStack)
-      setPageIdx(newPage - 1)
-    } else if (newPage < page) {
-      setPageIdx(newPage - 1)
-    }
+    handlePageChangeRaw(newPage, hasMore, nextCursor)
   }
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
-        <h1>{t("cases.title")}</h1>
-        <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>
+      <div className={shell.pageHead}>
+        <h1 className={styles.pageTitle}>{t("cases.title")}</h1>
+        <button className={shell.addBtn} onClick={() => setShowAddModal(true)}>
           <PlusIcon width={16} height={16} />
           {t("cases.add")}
         </button>
       </div>
 
       {isLoading ? (
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       ) : isError ? (
         <p>{t("common.error")}</p>
       ) : cases.length === 0 ? (

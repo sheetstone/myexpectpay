@@ -9,8 +9,10 @@ import { formatDate } from "@/utils/formatDate"
 import type { Payment, PaymentStatus, PaginatedResult } from "@/types"
 import { PAYMENT_STATUS } from "@/types"
 import { PAGE_SIZE } from "@/constants"
+import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { SendMoneyForm } from "./SendMoneyForm"
 import { RequestMoneyForm } from "./RequestMoneyForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./payments.module.css"
 
 interface Filters {
@@ -45,12 +47,9 @@ export function PaymentsClient() {
   const toast = useToast()
   const [filters, setFilters] = useState<Filters>({ startDate: "", endDate: "", status: "" })
   const [activeFilters, setActiveFilters] = useState<Filters>({ startDate: "", endDate: "", status: "" })
-  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
-  const [pageIdx, setPageIdx] = useState(0)
+  const { cursor, page, handlePageChange: handlePageChangeRaw, reset: resetPagination } = useCursorPagination()
   const [sendModal, setSendModal] = useState(false)
   const [requestModal, setRequestModal] = useState(false)
-
-  const cursor = cursorStack[pageIdx]
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["payments", cursor, activeFilters],
@@ -63,12 +62,10 @@ export function PaymentsClient() {
   const payments = data?.items ?? []
   const hasMore = data?.hasMore ?? false
   const nextCursor = data?.nextCursor ?? null
-  const page = pageIdx + 1
-  const totalPages = hasMore ? pageIdx + 2 : pageIdx + 1
+  const totalPages = hasMore ? page + 1 : page
 
   function applyFilters() {
-    setCursorStack([null])
-    setPageIdx(0)
+    resetPagination()
     setActiveFilters({ ...filters })
   }
 
@@ -76,18 +73,11 @@ export function PaymentsClient() {
     const empty = { startDate: "", endDate: "", status: "" }
     setFilters(empty)
     setActiveFilters(empty)
-    setCursorStack([null])
-    setPageIdx(0)
+    resetPagination()
   }
 
   function handlePageChange(newPage: number) {
-    if (newPage > page && hasMore) {
-      const newStack = [...cursorStack.slice(0, pageIdx + 1), nextCursor]
-      setCursorStack(newStack)
-      setPageIdx(newPage - 1)
-    } else if (newPage < page) {
-      setPageIdx(newPage - 1)
-    }
+    handlePageChangeRaw(newPage, hasMore, nextCursor)
   }
 
   function amountClass(payment: Payment) {
@@ -104,8 +94,8 @@ export function PaymentsClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
-        <h1>{t("payments.title")}</h1>
+      <div className={shell.pageHead}>
+        <h1 className={styles.pageTitle}>{t("payments.title")}</h1>
         <div className={styles.headActions}>
           <button className={styles.sendBtn} onClick={() => setSendModal(true)}>
             {t("payments.send")}
@@ -159,7 +149,7 @@ export function PaymentsClient() {
 
       {/* Table */}
       {isLoading ? (
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       ) : isError ? (
         <p>{t("common.error")}</p>
       ) : payments.length === 0 ? (

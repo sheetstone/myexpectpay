@@ -7,6 +7,8 @@ import { Spinner, Pagination } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
 import type { Message, MessagesResponse } from "@/types"
 import { PAGE_SIZE } from "@/constants"
+import { useCursorPagination } from "@/hooks/useCursorPagination"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./messages.module.css"
 
 async function fetchMessages(cursor: string | null): Promise<MessagesResponse> {
@@ -26,11 +28,8 @@ async function markRead(id: string): Promise<Message> {
 export function MessagesClient() {
   const intl = useIntl()
   const qc = useQueryClient()
-  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
-  const [pageIdx, setPageIdx] = useState(0)
+  const { cursor, page, handlePageChange: handlePageChangeRaw } = useCursorPagination()
   const [selected, setSelected] = useState<Message | null>(null)
-
-  const cursor = cursorStack[pageIdx]
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["messages", cursor],
@@ -53,8 +52,7 @@ export function MessagesClient() {
   const hasMore = data?.hasMore ?? false
   const nextCursor = data?.nextCursor ?? null
   const unreadCount = data?.unreadCount ?? 0
-  const page = pageIdx + 1
-  const totalPages = hasMore ? pageIdx + 2 : pageIdx + 1
+  const totalPages = hasMore ? page + 1 : page
 
   function handleSelect(msg: Message) {
     setSelected(msg)
@@ -62,18 +60,13 @@ export function MessagesClient() {
   }
 
   function handlePageChange(newPage: number) {
-    if (newPage > page && hasMore) {
-      setCursorStack([...cursorStack.slice(0, pageIdx + 1), nextCursor])
-      setPageIdx(newPage - 1)
-    } else if (newPage < page) {
-      setPageIdx(newPage - 1)
-    }
+    handlePageChangeRaw(newPage, hasMore, nextCursor)
   }
 
   if (isLoading) {
     return (
       <div className={styles.root}>
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       </div>
     )
   }
@@ -88,9 +81,9 @@ export function MessagesClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
+      <div className={shell.pageHead}>
         <div>
-          <h1>{t("messages.title")}</h1>
+          <h1 className={styles.pageTitle}>{t("messages.title")}</h1>
           {unreadCount > 0 && (
             <span className={styles.unreadBadge}>
               {t("messages.unread", { count: unreadCount })}
