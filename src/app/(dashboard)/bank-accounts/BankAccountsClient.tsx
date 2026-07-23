@@ -5,9 +5,6 @@ import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
 import { PlusIcon } from "@heroicons/react/24/outline"
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-} from "recharts"
 import { Modal, ConfirmDialog, Spinner, useToast } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
 import { formatMoney } from "@/utils/formatMoney"
@@ -21,6 +18,7 @@ import { VerifyBanner } from "./components/VerifyBanner"
 import { BankStatsRow } from "./components/BankStatsRow"
 import { BankInfoGrid } from "./components/BankInfoGrid"
 import { RoutingRulesSection } from "./components/RoutingRulesSection"
+import { PaymentTrendChart } from "./components/PaymentTrendChart"
 import { formatActivityDate } from "./formatActivityDate"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
@@ -37,11 +35,6 @@ async function fetchBankDetail(id: string): Promise<BankAccountDetail> {
   const res = await fetch(`/api/banks/${id}`)
   if (!res.ok) throw new Error("Failed to load bank detail")
   return res.json()
-}
-
-function monthLabel(monthKey: string) {
-  const [y, m] = monthKey.split("-").map(Number)
-  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(y, m - 1, 1))
 }
 
 export function BankAccountsClient() {
@@ -275,27 +268,7 @@ export function BankAccountsClient() {
 
             {/* Trend chart */}
             {detail && detail.id === selected.id && (
-              <div className={styles.section}>
-                <div className={styles.trendHead}>
-                  <p className={styles.sectionTitle}>{t("bankAccount.paymentTrend")}</p>
-                  <span className={styles.trendLegend}>{t("bankAccount.twelveMonths")}</span>
-                </div>
-                <ResponsiveContainer width="100%" height={100}>
-                  <LineChart
-                    data={detail.trend.map((item) => ({ ...item, month: monthLabel(item.month) }))}
-                    margin={{ top: 4, right: 8, left: -24, bottom: 0 }}
-                  >
-                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "var(--radius-sm)", fontSize: "0.75rem" }}
-                      formatter={(v) => (typeof v === "number" ? formatMoney(v) : String(v))}
-                    />
-                    <Line type="monotone" dataKey="sent" name={t("dashboard.totalSent")} stroke="var(--color-danger)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-                    <Line type="monotone" dataKey="received" name={t("dashboard.totalReceived")} stroke="var(--color-success)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+              <PaymentTrendChart trend={detail.trend} />
             )}
 
             {/* Recent transactions */}
