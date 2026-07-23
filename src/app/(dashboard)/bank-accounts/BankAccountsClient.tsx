@@ -18,6 +18,7 @@ import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
 import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { BankAccountForm } from "./BankAccountForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
 async function fetchBanks(cursor?: string | null): Promise<PaginatedResult<BankAccount>> {
@@ -217,7 +218,7 @@ export function BankAccountsClient() {
   if (isLoading) {
     return (
       <div className={styles.root}>
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       </div>
     )
   }
@@ -232,12 +233,12 @@ export function BankAccountsClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
+      <div className={shell.pageHead}>
         <div className={styles.headText}>
           <h1>{t("bankAccount.title")}</h1>
           <p>{t("bankAccount.description")}</p>
         </div>
-        <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>
+        <button className={shell.addBtn} onClick={() => setShowAddModal(true)}>
           <PlusIcon width={16} height={16} />
           {t("bankAccount.add")}
         </button>
