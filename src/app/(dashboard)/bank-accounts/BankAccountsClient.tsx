@@ -16,6 +16,7 @@ import { formatDate } from "@/utils/formatDate"
 import { formatMoney } from "@/utils/formatMoney"
 import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
 import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
+import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { BankAccountForm } from "./BankAccountForm"
 import styles from "./bankAccounts.module.css"
 
@@ -69,9 +70,7 @@ export function BankAccountsClient() {
   const cancellingNicknameRef = useRef(false)
   const [actionsOpen, setActionsOpen] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
-  const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
-  const [pageIdx, setPageIdx] = useState(0)
-  const cursor = cursorStack[pageIdx]
+  const { cursor, page, handlePageChange: handlePageChangeRaw } = useCursorPagination()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["banks", cursor],
@@ -81,17 +80,10 @@ export function BankAccountsClient() {
 
   const hasMore = data?.hasMore ?? false
   const nextCursor = data?.nextCursor ?? null
-  const page = pageIdx + 1
-  const totalPages = hasMore ? pageIdx + 2 : pageIdx + 1
+  const totalPages = hasMore ? page + 1 : page
 
   function handlePageChange(newPage: number) {
-    if (newPage > page && hasMore) {
-      const newStack = [...cursorStack.slice(0, pageIdx + 1), nextCursor]
-      setCursorStack(newStack)
-      setPageIdx(newPage - 1)
-    } else if (newPage < page) {
-      setPageIdx(newPage - 1)
-    }
+    handlePageChangeRaw(newPage, hasMore, nextCursor)
     setSelectedId(null)
   }
 
