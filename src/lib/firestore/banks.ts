@@ -214,19 +214,29 @@ export async function verifyBank(uid: string, id: string): Promise<BankAccount |
 
 export async function setPrimaryBank(uid: string, id: string): Promise<BankAccount | null> {
   const col = banksCol(uid)
-  const targetDoc = await col.doc(id).get()
-  if (!targetDoc.exists) return null
-
   const db = getAdminDb()
-  const batch = db.batch()
+  const targetRef = col.doc(id)
 
-  const currentPrimary = await col.where("isPrimary", "==", true).get()
-  currentPrimary.docs.forEach((d) =>
-    batch.update(d.ref, { isPrimary: false, updatedAt: FieldValue.serverTimestamp() }),
-  )
-  batch.update(col.doc(id), { isPrimary: true, updatedAt: FieldValue.serverTimestamp() })
-  await batch.commit()
+  // Reading the current primary account(s) and writing the swap must happen
+  // atomically — otherwise two concurrent calls can each read the pre-swap
+  // state and both "succeed," leaving more than one account flagged primary.
+  const exists = await db.runTransaction(async (transaction) => {
+    const [targetDoc, currentPrimary] = await Promise.all([
+      transaction.get(targetRef),
+      transaction.get(col.where("isPrimary", "==", true)),
+    ])
+    if (!targetDoc.exists) return false
 
-  const updated = await col.doc(id).get()
+    currentPrimary.docs.forEach((d) => {
+      if (d.id !== id) {
+        transaction.update(d.ref, { isPrimary: false, updatedAt: FieldValue.serverTimestamp() })
+      }
+    })
+    transaction.update(targetRef, { isPrimary: true, updatedAt: FieldValue.serverTimestamp() })
+    return true
+  })
+
+  if (!exists) return null
+  const updated = await targetRef.get()
   return docToBankAccount(updated.id, updated.data()!)
 }
