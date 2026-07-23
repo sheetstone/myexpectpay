@@ -9,6 +9,7 @@ import type { Case, PaginatedResult } from "@/types"
 import { PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { CaseForm } from "./CaseForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./cases.module.css"
 
 async function fetchCases(cursor?: string | null): Promise<PaginatedResult<Case>> {
@@ -60,16 +61,16 @@ export function CasesClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
-        <h1>{t("cases.title")}</h1>
-        <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>
+      <div className={shell.pageHead}>
+        <h1 className={styles.pageTitle}>{t("cases.title")}</h1>
+        <button className={shell.addBtn} onClick={() => setShowAddModal(true)}>
           <PlusIcon width={16} height={16} />
           {t("cases.add")}
         </button>
       </div>
 
       {isLoading ? (
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       ) : isError ? (
         <p>{t("common.error")}</p>
       ) : cases.length === 0 ? (
