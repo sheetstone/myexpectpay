@@ -4,10 +4,7 @@ import { useRef, useState } from "react"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import {
-  PlusIcon, PencilSquareIcon, StarIcon,
-  CheckIcon, ArrowDownTrayIcon, TrashIcon, ExclamationTriangleIcon,
-} from "@heroicons/react/24/outline"
+import { PlusIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -19,7 +16,7 @@ import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { BankAccountForm } from "./BankAccountForm"
 import { BankSidebar } from "./components/BankSidebar"
-import { ActionsMenu } from "./components/ActionsMenu"
+import { BankDetailHeader } from "./components/BankDetailHeader"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
@@ -246,87 +243,21 @@ export function BankAccountsClient() {
         {/* Detail panel */}
         {selected ? (
           <div className={styles.detail}>
-            <div className={styles.detailHead}>
-              <div>
-                <div className={styles.nicknameRow}>
-                  {editingNickname ? (
-                    <input
-                      className={styles.nicknameInput}
-                      value={nickDraft}
-                      onChange={(e) => setNickDraft(e.target.value)}
-                      onKeyDown={handleNicknameKeyDown}
-                      onBlur={handleNicknameBlur}
-                      autoFocus
-                      disabled={nicknameMutation.isPending}
-                      maxLength={60}
-                      aria-label={t("bankAccount.editNickname")}
-                    />
-                  ) : (
-                    <h2 className={styles.detailTitle}>{selected.nickname ?? selected.bankName}</h2>
-                  )}
-                  {!editingNickname && (
-                    <button
-                      type="button"
-                      className={styles.nicknameEditBtn}
-                      onClick={startEditNickname}
-                      aria-label={t("bankAccount.editNickname")}
-                      title={t("bankAccount.editNickname")}
-                    >
-                      <PencilSquareIcon width={14} height={14} />
-                    </button>
-                  )}
-                  {selected.isPrimary && (
-                    <span className={`${styles.pill} ${styles.pillPrimary}`}>
-                      {t("bankAccount.primaryBadge")}
-                    </span>
-                  )}
-                </div>
-                <p className={styles.detailSub}>
-                  {t("bankAccount.accountEndingIn", { last4: selected.accountNumberLast4 })}
-                </p>
-              </div>
-              <div className={styles.detailActions}>
-                {!selected.isPrimary && (
-                  <button
-                    className={styles.primaryBtn}
-                    onClick={() => setPrimaryMutation.mutate(selected.id)}
-                    disabled={setPrimaryMutation.isPending}
-                  >
-                    <StarIcon width={14} height={14} />
-                    {t("bankAccount.setPrimary")}
-                  </button>
-                )}
-                <ActionsMenu
-                  key={selected.id}
-                  label={t("bankAccount.actions")}
-                  items={[
-                    {
-                      icon: <PencilSquareIcon width={16} height={16} />,
-                      label: t("common.edit"),
-                      onClick: () => setEditAccount(selected),
-                    },
-                    ...(!selected.verified
-                      ? [{
-                          icon: <CheckIcon width={16} height={16} />,
-                          label: t("bankAccount.verify"),
-                          onClick: () => verifyMutation.mutate(selected.id),
-                        }]
-                      : []),
-                    {
-                      icon: <ArrowDownTrayIcon width={16} height={16} />,
-                      label: t("bankAccount.downloadStatement"),
-                      onClick: () => {},
-                    },
-                    {
-                      icon: <TrashIcon width={16} height={16} />,
-                      label: t("common.delete"),
-                      onClick: () => setDeleteTarget(selected),
-                      danger: true,
-                    },
-                  ]}
-                />
-              </div>
-            </div>
+            <BankDetailHeader
+              bank={selected}
+              editingNickname={editingNickname}
+              nickDraft={nickDraft}
+              onNickDraftChange={setNickDraft}
+              onStartEditNickname={startEditNickname}
+              onNicknameKeyDown={handleNicknameKeyDown}
+              onNicknameBlur={handleNicknameBlur}
+              isSavingNickname={nicknameMutation.isPending}
+              onSetPrimary={() => setPrimaryMutation.mutate(selected.id)}
+              isSettingPrimary={setPrimaryMutation.isPending}
+              onEdit={() => setEditAccount(selected)}
+              onVerify={() => verifyMutation.mutate(selected.id)}
+              onDelete={() => setDeleteTarget(selected)}
+            />
 
             {/* Verify banner */}
             {!selected.verified && (
