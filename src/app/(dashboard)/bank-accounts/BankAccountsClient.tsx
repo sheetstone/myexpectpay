@@ -11,13 +11,14 @@ import {
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
-import { Modal, ConfirmDialog, Spinner, Pagination, useToast } from "@/components/ui"
+import { Modal, ConfirmDialog, Spinner, useToast } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
 import { formatMoney } from "@/utils/formatMoney"
 import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
 import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { BankAccountForm } from "./BankAccountForm"
+import { BankSidebar } from "./components/BankSidebar"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
@@ -245,52 +246,15 @@ export function BankAccountsClient() {
       </div>
 
       <div className={styles.layout}>
-        {/* Sidebar */}
-        <aside className={styles.sidebar}>
-          <div className={styles.sidebarList}>
-            <div className={styles.sidebarHead}>
-              <p className={styles.sidebarTitle}>{t("bankAccount.linkedAccounts")}</p>
-              <span className={styles.sidebarCount}>{accounts.length}</span>
-            </div>
-            {accounts.length === 0 ? (
-              <p className={styles.sidebarEmpty}>{t("bankAccount.empty")}</p>
-            ) : (
-              <ul className={styles.accountList}>
-                {accounts.map((account) => {
-                  const isSelected = (selectedId ?? accounts[0]?.id) === account.id
-                  const initial = (account.nickname ?? account.bankName).charAt(0).toUpperCase()
-                  return (
-                    <li
-                      key={account.id}
-                      className={`${styles.accountItem}${isSelected ? ` ${styles.selected}` : ""}`}
-                      onClick={() => setSelectedId(account.id)}
-                    >
-                      <div className={styles.accountInitial}>{initial}</div>
-                      <div>
-                        <div className={styles.accountName}>{account.nickname ?? account.bankName}</div>
-                        <div className={styles.accountSub}>
-                          {t(`bankAccount.${account.accountType}`)} &middot; &bull;&bull;&bull;&bull;{account.accountNumberLast4}
-                        </div>
-                      </div>
-                      <span className={`${styles.pill} ${account.verified ? styles.pillVerified : styles.pillPending}`}>
-                        {account.verified ? t("bankAccount.verified") : "Pending"}
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-            {totalPages > 1 && (
-              <div className={styles.sidebarPagination}>
-                <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} />
-              </div>
-            )}
-          </div>
-          <button className={styles.addBtnSidebar} onClick={() => setShowAddModal(true)}>
-            <PlusIcon width={14} height={14} />
-            {t("bankAccount.add")}
-          </button>
-        </aside>
+        <BankSidebar
+          accounts={accounts}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          onAddNew={() => setShowAddModal(true)}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
 
         {/* Detail panel */}
         {selected ? (
