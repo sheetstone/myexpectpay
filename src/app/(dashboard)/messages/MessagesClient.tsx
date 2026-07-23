@@ -8,6 +8,7 @@ import { formatDate } from "@/utils/formatDate"
 import type { Message, MessagesResponse } from "@/types"
 import { PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./messages.module.css"
 
 async function fetchMessages(cursor: string | null): Promise<MessagesResponse> {
@@ -65,7 +66,7 @@ export function MessagesClient() {
   if (isLoading) {
     return (
       <div className={styles.root}>
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       </div>
     )
   }
@@ -80,9 +81,9 @@ export function MessagesClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
+      <div className={shell.pageHead}>
         <div>
-          <h1>{t("messages.title")}</h1>
+          <h1 className={styles.pageTitle}>{t("messages.title")}</h1>
           {unreadCount > 0 && (
             <span className={styles.unreadBadge}>
               {t("messages.unread", { count: unreadCount })}
