@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "@/test/testWrapper"
 import { PaymentsClient } from "../PaymentsClient"
 
@@ -48,7 +49,11 @@ vi.mock("@/components/ui", async (importOriginal) => {
     useToast: () => ({ toast: vi.fn() }),
     Modal: ({ open, children, title }: { open: boolean; children: React.ReactNode; title: string }) =>
       open ? <div role="dialog" aria-label={title}>{children}</div> : null,
-    Pagination: () => <div data-testid="pagination" />,
+    Pagination: ({ page, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) => (
+      <div data-testid="pagination">
+        <button onClick={() => onPageChange(page + 1)}>Next page</button>
+      </div>
+    ),
   }
 })
 vi.mock("../SendMoneyForm", () => ({ SendMoneyForm: () => <div>SendMoneyForm</div> }))
@@ -119,5 +124,43 @@ describe("PaymentsClient — required elements", () => {
     renderWithProviders(<PaymentsClient />)
     await screen.findByText("Alice Smith")
     expect(screen.getByTestId("pagination")).toBeInTheDocument()
+  })
+})
+
+describe("PaymentsClient — filter changes reset pagination", () => {
+  it("resets to page 1 (no cursor) when Filter is clicked while on a later page", async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("cursor=next1")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ items: [], total: 2, hasMore: false, nextCursor: null }),
+        })
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ ...mockPayments, hasMore: true, nextCursor: "next1" }),
+      })
+    })
+    global.fetch = fetchMock
+
+    renderWithProviders(<PaymentsClient />)
+    await screen.findByText("Alice Smith")
+
+    await user.click(screen.getByRole("button", { name: /next page/i }))
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("cursor=next1")),
+    )
+
+    // Change a filter value so the query key genuinely differs from the initial
+    // load's cached one — resetting to page 1 with otherwise-identical filters
+    // would just serve cached data with no new fetch call, which isn't what
+    // this test is checking.
+    await user.selectOptions(screen.getByRole("combobox"), "completed")
+    await user.click(screen.getByRole("button", { name: /^filter$/i }))
+    await waitFor(() => {
+      const lastUrl = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]![0] as string
+      expect(lastUrl).not.toContain("cursor=")
+    })
   })
 })
