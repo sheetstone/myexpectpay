@@ -12,6 +12,7 @@ import { PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { SendMoneyForm } from "./SendMoneyForm"
 import { RequestMoneyForm } from "./RequestMoneyForm"
+import shell from "@/components/shared/pageShell.module.css"
 import styles from "./payments.module.css"
 
 interface Filters {
@@ -93,8 +94,8 @@ export function PaymentsClient() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.pageHead}>
-        <h1>{t("payments.title")}</h1>
+      <div className={shell.pageHead}>
+        <h1 className={styles.pageTitle}>{t("payments.title")}</h1>
         <div className={styles.headActions}>
           <button className={styles.sendBtn} onClick={() => setSendModal(true)}>
             {t("payments.send")}
@@ -148,7 +149,7 @@ export function PaymentsClient() {
 
       {/* Table */}
       {isLoading ? (
-        <div className={styles.centred}><Spinner /></div>
+        <div className={shell.centred}><Spinner /></div>
       ) : isError ? (
         <p>{t("common.error")}</p>
       ) : payments.length === 0 ? (

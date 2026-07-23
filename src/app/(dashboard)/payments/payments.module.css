@@ -4,18 +4,7 @@
   padding: var(--space-8) var(--space-6);
 }
 
-.pageHead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding-bottom: var(--space-4);
-  border-bottom: 2px solid rgba(47, 168, 152, 0.18);
-  margin-bottom: var(--space-6);
-  flex-wrap: wrap;
-}
-
-.pageHead h1 {
+.pageTitle {
   font-size: 26px;
   font-weight: var(--weight-light);
   color: var(--color-text-heading);
@@ -179,7 +168,6 @@
 .status_reversal_completed { background: #fef9c3; color: #713f12; }
 .status_reversal_rejected { background: #fee2e2; color: #991b1b; }
 
-.centred { display: flex; justify-content: center; padding: var(--space-8) 0; }
 .pagination { margin-top: var(--space-4); padding: var(--space-4); border-top: 1px solid var(--color-border); }
 
 /* Coming soon modal */
