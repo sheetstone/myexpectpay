@@ -18,6 +18,9 @@ import { BankAccountForm } from "./BankAccountForm"
 import { BankSidebar } from "./components/BankSidebar"
 import { BankDetailHeader } from "./components/BankDetailHeader"
 import { VerifyBanner } from "./components/VerifyBanner"
+import { BankStatsRow } from "./components/BankStatsRow"
+import { RoutingTag } from "./components/RoutingTag"
+import { formatActivityDate } from "./formatActivityDate"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
@@ -35,27 +38,9 @@ async function fetchBankDetail(id: string): Promise<BankAccountDetail> {
   return res.json()
 }
 
-// lastActivity is a plain YYYY-MM-DD string with no time component; parsing it with
-// `new Date(string)` reads it as UTC midnight and can shift the displayed day
-// backward in timezones behind UTC, so build the Date from local components instead.
-function formatActivityDate(dateStr: string) {
-  const [y, m, d] = dateStr.split("-").map(Number)
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
-    new Date(y, m - 1, d)
-  )
-}
-
 function monthLabel(monthKey: string) {
   const [y, m] = monthKey.split("-").map(Number)
   return new Intl.DateTimeFormat("en-US", { month: "short" }).format(new Date(y, m - 1, 1))
-}
-
-function RoutingTag({ receive, send, styles: s }: { receive: boolean; send: boolean; styles: Record<string, string> }) {
-  const intl = useIntl()
-  if (receive && send) return <span className={`${s.routingTag} ${s.routingBoth}`}>{intl.formatMessage({ id: "bankAccount.receiveAndSend" })}</span>
-  if (receive) return <span className={`${s.routingTag} ${s.routingReceive}`}>{intl.formatMessage({ id: "bankAccount.receiveOnly" })}</span>
-  if (send) return <span className={`${s.routingTag} ${s.routingSend}`}>{intl.formatMessage({ id: "bankAccount.sendOnly" })}</span>
-  return <span className={`${s.routingTag} ${s.routingNone}`}>{intl.formatMessage({ id: "bankAccount.notRouted" })}</span>
 }
 
 export function BankAccountsClient() {
@@ -270,33 +255,11 @@ export function BankAccountsClient() {
 
             {/* Stats row */}
             {detail && detail.id === selected.id && (
-              <div className={styles.statsRow}>
-                <div className={styles.statCell}>
-                  <span className={styles.statLabel}>{t("dashboard.totalReceived")}</span>
-                  <span className={styles.statValue}>{formatMoney(detail.stats.totalReceived)}</span>
-                </div>
-                <div className={styles.statCell}>
-                  <span className={styles.statLabel}>{t("dashboard.totalSent")}</span>
-                  <span className={styles.statValue}>{formatMoney(detail.stats.totalSent)}</span>
-                </div>
-                <div className={styles.statCell}>
-                  <span className={styles.statLabel}>{t("bankAccount.linkedCases")}</span>
-                  <span className={styles.statValueSm}>{detail.stats.linkedCases}</span>
-                  <span className={styles.statSub}>
-                    {t("bankAccount.activeCases", { count: detail.stats.linkedCases })}
-                  </span>
-                </div>
-                <div className={styles.statCell}>
-                  <span className={styles.statLabel}>{t("bankAccount.usedFor")}</span>
-                  <span className={styles.statValueSm}>
-                    <RoutingTag receive={selected.receivePayments} send={selected.sendPayments} styles={styles} />
-                  </span>
-                  <span className={styles.statSub}>
-                    {t("bankAccount.lastActivity")}{" "}
-                    {detail.stats.lastActivity ? formatActivityDate(detail.stats.lastActivity) : t("bankAccount.noActivity")}
-                  </span>
-                </div>
-              </div>
+              <BankStatsRow
+                stats={detail.stats}
+                receivePayments={selected.receivePayments}
+                sendPayments={selected.sendPayments}
+              />
             )}
 
             {/* Info grid */}
@@ -325,7 +288,7 @@ export function BankAccountsClient() {
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>{t("bankAccount.routingRules")}</span>
-                <RoutingTag receive={selected.receivePayments} send={selected.sendPayments} styles={styles} />
+                <RoutingTag receive={selected.receivePayments} send={selected.sendPayments} />
               </div>
             </div>
 
