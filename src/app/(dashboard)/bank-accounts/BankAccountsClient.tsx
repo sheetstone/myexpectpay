@@ -4,7 +4,7 @@ import { useRef, useState } from "react"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
-import { PlusIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
+import { PlusIcon } from "@heroicons/react/24/outline"
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts"
@@ -17,6 +17,7 @@ import { useCursorPagination } from "@/hooks/useCursorPagination"
 import { BankAccountForm } from "./BankAccountForm"
 import { BankSidebar } from "./components/BankSidebar"
 import { BankDetailHeader } from "./components/BankDetailHeader"
+import { VerifyBanner } from "./components/VerifyBanner"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
@@ -261,22 +262,10 @@ export function BankAccountsClient() {
 
             {/* Verify banner */}
             {!selected.verified && (
-              <div className={styles.verifyBanner}>
-                <div className={styles.verifyBannerIcon}>
-                  <ExclamationTriangleIcon width={16} height={16} />
-                </div>
-                <div className={styles.verifyBannerText}>
-                  <div className={styles.verifyBannerTitle}>{t("bankAccount.verifyBannerTitle")}</div>
-                  <div className={styles.verifyBannerDesc}>{t("bankAccount.verifyBannerDesc")}</div>
-                </div>
-                <button
-                  className={styles.verifyBtn}
-                  onClick={() => verifyMutation.mutate(selected.id)}
-                  disabled={verifyMutation.isPending}
-                >
-                  {t("bankAccount.verify")}
-                </button>
-              </div>
+              <VerifyBanner
+                onVerify={() => verifyMutation.mutate(selected.id)}
+                isPending={verifyMutation.isPending}
+              />
             )}
 
             {/* Stats row */}
