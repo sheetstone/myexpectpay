@@ -1,13 +1,11 @@
 "use client"
 
 import { useRef, useState } from "react"
-import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useIntl } from "react-intl"
 import { PlusIcon } from "@heroicons/react/24/outline"
 import { Modal, ConfirmDialog, Spinner, useToast } from "@/components/ui"
 import { formatDate } from "@/utils/formatDate"
-import { formatMoney } from "@/utils/formatMoney"
 import type { BankAccount, BankAccountDetail, PaginatedResult } from "@/types"
 import { BANK_ACCOUNTS_PAGE_SIZE } from "@/constants"
 import { useCursorPagination } from "@/hooks/useCursorPagination"
@@ -19,7 +17,7 @@ import { BankStatsRow } from "./components/BankStatsRow"
 import { BankInfoGrid } from "./components/BankInfoGrid"
 import { RoutingRulesSection } from "./components/RoutingRulesSection"
 import { PaymentTrendChart } from "./components/PaymentTrendChart"
-import { formatActivityDate } from "./formatActivityDate"
+import { RecentTransactionsTable } from "./components/RecentTransactionsTable"
 import shell from "@/components/shared/pageShell.module.css"
 import styles from "./bankAccounts.module.css"
 
@@ -273,49 +271,7 @@ export function BankAccountsClient() {
 
             {/* Recent transactions */}
             {detail && detail.id === selected.id && (
-              <div className={styles.section}>
-                <p className={styles.sectionTitle}>{t("bankAccount.recentTransactions")}</p>
-                {detail.recentPayments.length === 0 ? (
-                  <p className={styles.txEmpty}>{t("bankAccount.noTransactions")}</p>
-                ) : (
-                  <>
-                    <table className={styles.txTable}>
-                      <thead>
-                        <tr>
-                          <th>{t("payments.paymentDate")}</th>
-                          <th>{t("payments.caseNumber")}</th>
-                          <th>{t("payments.type")}</th>
-                          <th className={styles.txAmtHeader}>{t("payments.amount")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {detail.recentPayments.map((tx) => {
-                          const isReceive = tx.type === "received" || tx.type === "pending_received"
-                          return (
-                            <tr key={tx.id}>
-                              <td>{formatActivityDate(tx.paymentDate)}</td>
-                              <td>{tx.caseNumber || "—"}</td>
-                              <td>
-                                <span className={`${styles.txType}${isReceive ? ` ${styles.txTypeReceived}` : ` ${styles.txTypeSent}`}`}>
-                                  {isReceive ? t("payments.typeReceived") : t("payments.typeSent")}
-                                </span>
-                              </td>
-                              <td className={`${styles.txAmt}${isReceive ? ` ${styles.txAmtReceived}` : ` ${styles.txAmtSent}`}`}>
-                                {isReceive ? "+" : "−"}{formatMoney(tx.amount)}
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                    <div className={styles.txFoot}>
-                      <Link href="/payments" className={styles.txLink}>
-                        {t("bankAccount.viewAllPayments")}
-                      </Link>
-                    </div>
-                  </>
-                )}
-              </div>
+              <RecentTransactionsTable payments={detail.recentPayments} />
             )}
 
             <div className={styles.section}>
